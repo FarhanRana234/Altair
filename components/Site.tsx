@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useScroll } from "framer-motion";
 import Starfield from "./Starfield";
 import HeroCanvas from "./HeroCanvas";
 import Navbar from "./Navbar";
@@ -19,12 +18,10 @@ export default function Site() {
   const [sponsorshipOpen, setSponsorshipOpen] = useState(false);
   const openSponsorship = () => setSponsorshipOpen(true);
 
-  const { scrollYProgress } = useScroll();
-
   return (
     <>
       <Starfield />
-      <HeroCanvas progress={scrollYProgress} />
+      <HeroCanvas />
       <Navbar onSponsorClick={openSponsorship} />
       <main className="relative z-10">
         <Hero />

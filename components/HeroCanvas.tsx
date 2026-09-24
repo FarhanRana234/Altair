@@ -1,28 +1,82 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useLayoutEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import type { MotionValue } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Boxes, Sparkles } from "lucide-react";
-import GliderParticles, { type VisualMode } from "./GliderParticles";
+import GliderParticles, {
+  type GliderTarget,
+  type VisualMode,
+} from "./GliderParticles";
+import ModelErrorBoundary from "./ModelErrorBoundary";
+import { LOCAL_GLIDER_URL, FALLBACK_GLIDER_URL } from "../lib/gltf";
 
-export default function HeroCanvas({ progress }: { progress: MotionValue<number> }) {
+gsap.registerPlugin(ScrollTrigger);
+
+const PATH_START = { x: -4, y: 2.5, rotX: 0.35, rotY: 0.55, rotZ: 0.15, scale: 1 };
+
+export default function HeroCanvas() {
   const [mode, setMode] = useState<VisualMode>("particles");
+  const target = useRef<GliderTarget>(PATH_START);
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: document.documentElement,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
+          invalidateOnRefresh: true,
+        },
+        defaults: { ease: "none" },
+      });
+
+      // Phase 1 (0% -> 50% scroll): top-left -> top-right, gentle banking.
+      tl.to(target.current, {
+        x: 4,
+        y: 2.5,
+        rotX: 0.4,
+        rotY: -0.15,
+        rotZ: -0.2,
+        duration: 1,
+      });
+
+      // Phase 2 (50% -> 100% scroll): drop vertically down to bottom-right.
+      tl.to(target.current, {
+        x: 4,
+        y: -2.5,
+        rotX: 0.06,
+        rotY: -0.3,
+        rotZ: 0.12,
+        scale: 0.85,
+        duration: 1,
+      });
+    });
+    return () => ctx.revert();
+  }, []);
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[6]">
       <Canvas
         frameloop="always"
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         dpr={[1, 1.5]}
         camera={{ position: [0, 0, 7], fov: 42, near: 0.1, far: 50 }}
       >
+        <ambientLight intensity={1.5} />
+        <directionalLight position={[10, 10, 10]} intensity={1.2} />
+        <directionalLight position={[-5, -3, 3]} intensity={0.35} color="#3b82f6" />
+        <pointLight position={[3, 2, 4]} intensity={30} color="#00f0ff" />
         <Suspense fallback={null}>
-          <ambientLight intensity={0.7} />
-          <directionalLight position={[4, 6, 6]} intensity={1.1} />
-          <directionalLight position={[-5, -3, 3]} intensity={0.35} color="#3b82f6" />
-          <pointLight position={[3, 2, 4]} intensity={30} color="#00f0ff" />
-          <GliderParticles progress={progress} mode={mode} />
+          <ModelErrorBoundary
+            fallback={
+              <GliderParticles url={FALLBACK_GLIDER_URL} target={target} mode={mode} />
+            }
+          >
+            <GliderParticles url={LOCAL_GLIDER_URL} target={target} mode={mode} />
+          </ModelErrorBoundary>
         </Suspense>
       </Canvas>
 

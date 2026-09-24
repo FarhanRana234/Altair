@@ -1,13 +1,19 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Box } from "lucide-react";
+import ModelErrorBoundary from "./ModelErrorBoundary";
+import {
+  LOCAL_GLIDER_URL,
+  FALLBACK_GLIDER_URL,
+  normalizingMatrix,
+  decomposeMatrix,
+} from "../lib/gltf";
 
-const MODEL_URL = "/models/glider.glb";
-useGLTF.preload(MODEL_URL);
+useGLTF.preload(LOCAL_GLIDER_URL);
 
 type ViewerMode = "render" | "cad";
 
@@ -34,19 +40,29 @@ function cadMaterial(): THREE.MeshStandardMaterial {
   });
 }
 
-function GLTFModel({ mode }: { mode: ViewerMode }) {
-  const { scene } = useGLTF(MODEL_URL);
+function GLTFModel({ url, mode }: { url: string; mode: ViewerMode }) {
+  const { scene } = useGLTF(url);
+
+  const model = useMemo(() => {
+    const clone = scene.clone() as THREE.Object3D;
+    const matrix = normalizingMatrix(scene);
+    const { position, quaternion, scale } = decomposeMatrix(matrix);
+    clone.position.copy(position);
+    clone.quaternion.copy(quaternion);
+    clone.scale.copy(scale);
+    return clone;
+  }, [scene]);
 
   useEffect(() => {
-    scene.traverse((obj) => {
+    model.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
       if (mesh.isMesh) {
         mesh.material = mode === "cad" ? cadMaterial() : renderMaterial();
       }
     });
-  }, [scene, mode]);
+  }, [model, mode]);
 
-  return <primitive object={scene} scale={1.1} />;
+  return <primitive object={model} />;
 }
 
 export default function Glider3DViewer() {
@@ -55,16 +71,21 @@ export default function Glider3DViewer() {
   return (
     <div className="relative h-full w-full">
       <Canvas
-        gl={{ antialias: true, alpha: true }}
+        frameloop="always"
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         dpr={[1, 1.5]}
         camera={{ position: [4, 2.2, 6], fov: 42, near: 0.1, far: 50 }}
       >
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[4, 6, 6]} intensity={1.2} />
+        <ambientLight intensity={1.5} />
+        <directionalLight position={[10, 10, 10]} intensity={1.2} />
         <directionalLight position={[-5, -3, 3]} intensity={0.35} color="#3b82f6" />
         <pointLight position={[3, 2, 4]} intensity={25} color="#00f0ff" />
         <Suspense fallback={null}>
-          <GLTFModel mode={mode} />
+          <ModelErrorBoundary
+            fallback={<GLTFModel url={FALLBACK_GLIDER_URL} mode={mode} />}
+          >
+            <GLTFModel url={LOCAL_GLIDER_URL} mode={mode} />
+          </ModelErrorBoundary>
         </Suspense>
         <OrbitControls
           enablePan={false}

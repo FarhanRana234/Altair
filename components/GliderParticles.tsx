@@ -4,29 +4,32 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, Preload } from "@react-three/drei";
-import type { MotionValue } from "framer-motion";
-import { useTransform } from "framer-motion";
+import {
+  LOCAL_GLIDER_URL,
+  normalizingMatrix,
+  decomposeMatrix,
+} from "../lib/gltf";
 
 export type VisualMode = "particles" | "solid";
 
-const MODEL_URL = "/models/glider.glb";
+export type GliderTarget = {
+  x: number;
+  y: number;
+  scale: number;
+  rotX: number;
+  rotY: number;
+  rotZ: number;
+};
 
-useGLTF.preload(MODEL_URL);
-
-// Whole-page scroll trajectory (progress 0 = hero top, 1 = footer bottom).
-// 0% -> 50%:  pinned TOP-LEFT (X: -2.5...-1.5, Y: 2.0), gentle drift/floating in place
-// 50% -> 100%: begins primary descent, sweeping diagonally down toward bottom-center/left,
-//              resting level above the footer
-const KEYFRAMES = [0, 0.5, 0.65, 0.8, 1];
-
-const POS_X = [-2.2, -1.75, 0.4, -0.6, -1.6];
-const POS_Y = [2.0, 2.0, 0.6, -1.2, -1.7];
-const ROT_X = [0.35, 0.4, 0.3, 0.15, 0.06];
-const ROT_Y = [0.6, 0.55, 0.2, -0.15, -0.3];
-const ROT_Z = [0.15, 0.2, 1.1, 0.45, 0.12];
-const SCALE = [1.0, 1.05, 1.18, 1.0, 0.85];
+useGLTF.preload(LOCAL_GLIDER_URL);
 
 const PARTICLE_COUNT = 4500;
+
+type RigProps = {
+  url: string;
+  target: React.MutableRefObject<GliderTarget>;
+  mode: VisualMode;
+};
 
 function makeSoftDotTexture(): THREE.CanvasTexture {
   const size = 64;
@@ -47,7 +50,7 @@ function makeSoftDotTexture(): THREE.CanvasTexture {
   return texture;
 }
 
-function collectGeometryArea(
+function geometryTriangles(
   geometry: THREE.BufferGeometry
 ): { triangles: Array<[number, number, number]>; totalArea: number } {
   const pos = geometry.attributes.position as THREE.BufferAttribute;
@@ -82,13 +85,24 @@ function collectGeometryArea(
   return { triangles, totalArea };
 }
 
+function collectAllGeometries(scene: THREE.Object3D): THREE.BufferGeometry[] {
+  const all: THREE.BufferGeometry[] = [];
+  scene.traverse((obj) => {
+    const mesh = obj as THREE.Mesh;
+    if (mesh.isMesh && mesh.geometry) {
+      all.push(mesh.geometry);
+    }
+  });
+  return all;
+}
+
 function sampleForGeometry(
   geometry: THREE.BufferGeometry,
   count: number,
   out: Float32Array,
   offset: number
 ): number {
-  const { triangles, totalArea } = collectGeometryArea(geometry);
+  const { triangles, totalArea } = geometryTriangles(geometry);
   if (!triangles.length || totalArea <= 0) return offset;
 
   const pos = geometry.attributes.position as THREE.BufferAttribute;
@@ -99,9 +113,7 @@ function sampleForGeometry(
     const a = new THREE.Vector3().fromBufferAttribute(pos, i0);
     const b = new THREE.Vector3().fromBufferAttribute(pos, i1);
     const c = new THREE.Vector3().fromBufferAttribute(pos, i2);
-    const ab = b.clone().sub(a);
-    const ac = c.clone().sub(a);
-    running += ab.cross(ac).length() * 0.5;
+    running += b.clone().sub(a).cross(c.clone().sub(a)).length() * 0.5;
     cum[t] = running;
   }
 
@@ -150,27 +162,24 @@ function makeColors(positions: Float32Array): Float32Array {
   return colors;
 }
 
-function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: VisualMode }) {
-  const { scene } = useGLTF(MODEL_URL);
+function GliderRig({ url, target, mode }: RigProps) {
+  const { scene } = useGLTF(url);
   const group = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
   const solidsRef = useRef<THREE.Group>(null);
 
-  const geometries = useMemo<THREE.BufferGeometry[]>(() => {
-    const all: THREE.BufferGeometry[] = [];
-    scene.traverse((obj) => {
-      const mesh = obj as THREE.Mesh;
-      if (mesh.isMesh && mesh.geometry) {
-        all.push(mesh.geometry);
-      }
-    });
-    return all;
+  const normalization = useMemo(() => {
+    const matrix = normalizingMatrix(scene);
+    const { position, quaternion, scale } = decomposeMatrix(matrix);
+    return { position, rotation: new THREE.Euler().setFromQuaternion(quaternion), scale, matrix };
   }, [scene]);
+
+  const geometries = useMemo(() => collectAllGeometries(scene), [scene]);
 
   const pointsGeometry = useMemo(() => {
     if (!geometries.length) return null;
     const positions = new Float32Array(PARTICLE_COUNT * 3);
-    const areas = geometries.map((g) => collectGeometryArea(g).totalArea);
+    const areas = geometries.map((g) => geometryTriangles(g).totalArea);
     const total = areas.reduce((sum, a) => sum + a, 0);
     let offset = 0;
     if (total > 0) {
@@ -182,51 +191,53 @@ function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: Vi
     if (offset < PARTICLE_COUNT) {
       sampleForGeometry(geometries[0], PARTICLE_COUNT - offset, positions, offset);
     }
+
+    const v = new THREE.Vector3();
+    for (let p = 0; p < PARTICLE_COUNT; p += 1) {
+      v.set(positions[p * 3], positions[p * 3 + 1], positions[p * 3 + 2]);
+      v.applyMatrix4(normalization.matrix);
+      positions[p * 3] = v.x;
+      positions[p * 3 + 1] = v.y;
+      positions[p * 3 + 2] = v.z;
+    }
+
     const colors = makeColors(positions);
     const buffer = new THREE.BufferGeometry();
     buffer.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     buffer.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     return buffer;
-  }, [geometries]);
+  }, [geometries, normalization]);
 
   const dotTexture = useMemo(() => makeSoftDotTexture(), []);
 
-  const rotX = useTransform(progress, KEYFRAMES, ROT_X);
-  const rotY = useTransform(progress, KEYFRAMES, ROT_Y);
-  const rotZ = useTransform(progress, KEYFRAMES, ROT_Z);
-  const posX = useTransform(progress, KEYFRAMES, POS_X);
-  const posY = useTransform(progress, KEYFRAMES, POS_Y);
-  const scale = useTransform(progress, KEYFRAMES, SCALE);
-
-  const current = useRef({
-    rotX: ROT_X[0],
-    rotY: ROT_Y[0],
-    rotZ: ROT_Z[0],
-    posX: POS_X[0],
-    posY: POS_Y[0],
-    scale: SCALE[0],
-    pointerX: 0,
-    oPts: 1,
-    oSolid: 0,
+  const current = useRef<GliderTarget>({
+    x: -4,
+    y: 2.5,
+    scale: 1,
+    rotX: 0.35,
+    rotY: 0.55,
+    rotZ: 0.15,
   });
+  const currentPointerX = useRef(0);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     const k = Math.min(delta, 0.1);
     const c = current.current;
+    const tgt = target.current;
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
     const xFactor = isMobile ? 0.55 : 1;
-    const scaleFactor = isMobile ? 0.55 : 1;
+    const scaleFactor = isMobile ? 0.6 : 1;
     const halfW = state.viewport.width / 2 - 0.3;
 
-    c.rotX = THREE.MathUtils.damp(c.rotX, rotX.get(), 4, k);
-    c.rotY = THREE.MathUtils.damp(c.rotY, rotY.get(), 4, k);
-    c.rotZ = THREE.MathUtils.damp(c.rotZ, rotZ.get(), 4, k);
-    c.posX = THREE.MathUtils.damp(c.posX, posX.get(), 4, k);
-    c.posY = THREE.MathUtils.damp(c.posY, posY.get(), 4, k);
-    c.scale = THREE.MathUtils.damp(c.scale, scale.get(), 4, k);
-    c.pointerX = THREE.MathUtils.damp(
-      c.pointerX,
+    c.rotX = THREE.MathUtils.damp(c.rotX, tgt.rotX, 4, k);
+    c.rotY = THREE.MathUtils.damp(c.rotY, tgt.rotY, 4, k);
+    c.rotZ = THREE.MathUtils.damp(c.rotZ, tgt.rotZ, 4, k);
+    c.x = THREE.MathUtils.damp(c.x, tgt.x, 4, k);
+    c.y = THREE.MathUtils.damp(c.y, tgt.y, 4, k);
+    c.scale = THREE.MathUtils.damp(c.scale, tgt.scale, 4, k);
+    currentPointerX.current = THREE.MathUtils.damp(
+      currentPointerX.current,
       state.pointer.x * 0.35 * (isMobile ? 0.6 : 1),
       3,
       k
@@ -235,13 +246,13 @@ function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: Vi
     if (group.current) {
       group.current.rotation.set(
         c.rotX,
-        c.rotY + c.pointerX * 0.12 + Math.sin(t * 0.5) * 0.04,
+        c.rotY + currentPointerX.current * 0.12 + Math.sin(t * 0.5) * 0.03,
         c.rotZ
       );
-      const float = Math.sin(t * 0.8) * 0.05;
-      const baseX = (c.posX + c.pointerX) * xFactor;
+      const float = Math.sin(t * 0.8) * 0.04;
+      const baseX = (c.x + currentPointerX.current) * xFactor;
       const clampedX = THREE.MathUtils.clamp(baseX, -halfW, halfW);
-      group.current.position.set(clampedX, c.posY + float, 0);
+      group.current.position.set(clampedX, c.y + float, 0);
       group.current.scale.setScalar(c.scale * scaleFactor);
     }
 
@@ -277,35 +288,39 @@ function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: Vi
           />
         </points>
       ) : null}
-      <group ref={solidsRef}>
-        {geometries.map((geometry, i) => (
-          <mesh key={i} geometry={geometry}>
-            <meshStandardMaterial
-              color="#d7e0f0"
-              metalness={0.85}
-              roughness={0.25}
-              emissive="#1e3a8a"
-              emissiveIntensity={0.2}
-              transparent
-              opacity={0.03}
-            />
-          </mesh>
-        ))}
+      <group position={normalization.position} rotation={normalization.rotation} scale={normalization.scale}>
+        <group ref={solidsRef}>
+          {geometries.map((geometry, i) => (
+            <mesh key={i} geometry={geometry}>
+              <meshStandardMaterial
+                color="#d7e0f0"
+                metalness={0.85}
+                roughness={0.25}
+                emissive="#1e3a8a"
+                emissiveIntensity={0.2}
+                transparent
+                opacity={0.03}
+              />
+            </mesh>
+          ))}
+        </group>
       </group>
     </group>
   );
 }
 
 export default function GliderParticles({
-  progress,
+  url = LOCAL_GLIDER_URL,
+  target,
   mode,
 }: {
-  progress: MotionValue<number>;
+  url?: string;
+  target: React.RefObject<GliderTarget>;
   mode: VisualMode;
 }) {
   return (
     <>
-      <GliderRig progress={progress} mode={mode} />
+      <GliderRig url={url} target={target as React.MutableRefObject<GliderTarget>} mode={mode} />
       <Preload all />
     </>
   );
