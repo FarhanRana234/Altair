@@ -6,17 +6,20 @@ export default function AeroPakistanIntro() {
   return (
     <section
       id="aero-pakistan"
-      className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center px-6 py-32 text-center"
+      className="relative z-10 mx-auto flex min-h-[130vh] w-full max-w-4xl flex-col items-center justify-center px-6 py-32 text-center"
     >
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.4 }}
+        viewport={{ once: true, amount: 0.35 }}
         transition={{ duration: 1, ease: "easeOut" }}
-        className="glass-card px-8 py-14 sm:px-16 sm:py-20"
+        className="w-full"
       >
-        <p className="eyebrow mb-6">01 — The Arena</p>
-        <h2 className="section-heading mb-10">WHAT IS AERO PAKISTAN?</h2>
+        <p className="eyebrow mb-6">01 — AERO PAKISTAN</p>
+        <h2 className="section-heading mb-10">
+          THAT SOMEWHERE BEYOND WHAT WE ALREADY{" "}
+          <span className="italic text-accent-cyan/90">KNOW</span>...
+        </h2>
         <p className="section-body">
           Aero Pakistan is a national-level STEM and education competition where
           student teams design, build, and race scaled-down gliders, and

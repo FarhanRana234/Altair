@@ -62,7 +62,7 @@ export default function Team() {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="lg:sticky lg:top-28 lg:self-start"
         >
-          <p className="eyebrow mb-6">04 — The Crew</p>
+          <p className="eyebrow mb-6">05 — The Crew</p>
           <h2 className="section-heading text-left">TEAM ALTAIR</h2>
           <p className="section-body mt-8">
             ALTAIR is a team of 6 passionate individuals building a glider for
