@@ -1,26 +1,24 @@
 "use client";
 
 import { motion } from "framer-motion";
+import OrganizedByCard from "./OrganizedByCard";
 
 export default function AeroPakistanIntro() {
   return (
     <section
       id="aero-pakistan"
-      className="relative z-10 mx-auto flex min-h-[130vh] w-full max-w-4xl flex-col items-center justify-center px-6 py-32 text-center"
+      className="relative z-10 mx-auto w-full max-w-5xl px-6 py-32"
     >
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.35 }}
         transition={{ duration: 1, ease: "easeOut" }}
-        className="w-full"
+        className="glass-card p-8 sm:p-12 lg:p-16"
       >
-        <p className="eyebrow mb-6">01 — AERO PAKISTAN</p>
-        <h2 className="section-heading mb-10">
-          THAT SOMEWHERE BEYOND WHAT WE ALREADY{" "}
-          <span className="italic text-accent-cyan/90">KNOW</span>...
-        </h2>
-        <p className="section-body">
+        <p className="eyebrow mb-6">01 — The Arena</p>
+        <h2 className="section-heading mb-10">WHAT IS AERO PAKISTAN?</h2>
+        <p className="section-body max-w-4xl">
           Aero Pakistan is a national-level STEM and education competition where
           student teams design, build, and race scaled-down gliders, and
           showcase their work through portfolios, presentations, and marketing.
@@ -40,6 +38,16 @@ export default function AeroPakistanIntro() {
             </span>
           ))}
         </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
+        className="mt-10 w-full"
+      >
+        <OrganizedByCard />
       </motion.div>
     </section>
   );

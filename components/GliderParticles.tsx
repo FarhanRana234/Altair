@@ -9,18 +9,22 @@ import { useTransform } from "framer-motion";
 
 export type VisualMode = "particles" | "solid";
 
-const MODEL_URL = "/models/glider.gltf";
+const MODEL_URL = "/models/glider.glb";
 
 useGLTF.preload(MODEL_URL);
 
-const KEYFRAMES = [0, 0.15, 0.3, 0.55, 0.8, 1];
+// Whole-page scroll trajectory (progress 0 = hero top, 1 = footer bottom).
+// 0%  -> glider sits in the TOP-LEFT corner, pitched diagonally down toward center
+// 30-60% -> sweeps diagonal across to MIDDLE-RIGHT while banking along its wing axis
+// 70-100% -> descends toward BOTTOM-CENTER / BOTTOM-LEFT, leveling out above the footer
+const KEYFRAMES = [0, 0.3, 0.6, 0.8, 1];
 
-const ROT_X = [-0.45, 0.85, 0.5, 1.35, -0.08, -0.08];
-const ROT_Y = [0.75, 0.4, -0.9, 0.0, -0.35, -0.35];
-const ROT_Z = [-0.1, 0.15, 0.85, 0.05, -0.12, -0.12];
-const POS_X = [-0.3, -0.3, 0.9, -0.7, 0.0, 0.0];
-const POS_Y = [0, 0, 0, 0, 1.5, 1.5];
-const SCALE = [1.0, 1.0, 0.95, 0.85, 1.06, 1.06];
+const POS_X = [-3.0, 0.4, 2.9, 0.4, -1.7];
+const POS_Y = [1.7, 0.85, -0.15, -1.55, -1.7];
+const ROT_X = [0.6, 0.5, 0.32, 0.14, 0.06];
+const ROT_Y = [0.85, 0.55, 0.1, -0.2, -0.3];
+const ROT_Z = [0.2, 0.95, 1.35, 0.4, 0.15];
+const SCALE = [0.85, 1.05, 1.18, 1.0, 0.85];
 
 const PARTICLE_COUNT = 9000;
 
@@ -43,54 +47,77 @@ function makeSoftDotTexture(): THREE.CanvasTexture {
   return texture;
 }
 
-function sampleParticlePositions(
-  geometry: THREE.BufferGeometry,
-  count: number
-): Float32Array {
+function collectGeometryArea(
+  geometry: THREE.BufferGeometry
+): { triangles: Array<[number, number, number]>; totalArea: number } {
   const pos = geometry.attributes.position as THREE.BufferAttribute;
   const index = geometry.index;
-  const tris: Array<[number, number, number]> = [];
+  const triangles: Array<[number, number, number]> = [];
 
   if (index) {
     for (let i = 0; i < index.count; i += 3) {
-      tris.push([index.getX(i), index.getX(i + 1), index.getX(i + 2)]);
+      triangles.push([index.getX(i), index.getX(i + 1), index.getX(i + 2)]);
     }
   } else {
     for (let i = 0; i < pos.count; i += 3) {
-      tris.push([i, i + 1, i + 2]);
+      triangles.push([i, i + 1, i + 2]);
     }
   }
 
-  const cum = new Float32Array(tris.length);
-  let total = 0;
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
   const c = new THREE.Vector3();
   const ab = new THREE.Vector3();
   const ac = new THREE.Vector3();
-
-  for (let t = 0; t < tris.length; t += 1) {
-    const [i0, i1, i2] = tris[t];
+  let totalArea = 0;
+  for (let t = 0; t < triangles.length; t += 1) {
+    const [i0, i1, i2] = triangles[t];
     a.fromBufferAttribute(pos, i0);
     b.fromBufferAttribute(pos, i1);
     c.fromBufferAttribute(pos, i2);
     ab.subVectors(b, a);
     ac.subVectors(c, a);
-    total += ab.cross(ac).length() * 0.5;
-    cum[t] = total;
+    totalArea += ab.cross(ac).length() * 0.5;
+  }
+  return { triangles, totalArea };
+}
+
+function sampleForGeometry(
+  geometry: THREE.BufferGeometry,
+  count: number,
+  out: Float32Array,
+  offset: number
+): number {
+  const { triangles, totalArea } = collectGeometryArea(geometry);
+  if (!triangles.length || totalArea <= 0) return offset;
+
+  const pos = geometry.attributes.position as THREE.BufferAttribute;
+  const cum = new Float32Array(triangles.length);
+  let running = 0;
+  for (let t = 0; t < triangles.length; t += 1) {
+    const [i0, i1, i2] = triangles[t];
+    const a = new THREE.Vector3().fromBufferAttribute(pos, i0);
+    const b = new THREE.Vector3().fromBufferAttribute(pos, i1);
+    const c = new THREE.Vector3().fromBufferAttribute(pos, i2);
+    const ab = b.clone().sub(a);
+    const ac = c.clone().sub(a);
+    running += ab.cross(ac).length() * 0.5;
+    cum[t] = running;
   }
 
-  const out = new Float32Array(count * 3);
+  const a = new THREE.Vector3();
+  const b = new THREE.Vector3();
+  const c = new THREE.Vector3();
   for (let p = 0; p < count; p += 1) {
-    const r = Math.random() * total;
+    const r = Math.random() * totalArea;
     let lo = 0;
-    let hi = tris.length - 1;
+    let hi = triangles.length - 1;
     while (lo < hi) {
       const mid = (lo + hi) >> 1;
       if (cum[mid] < r) lo = mid + 1;
       else hi = mid;
     }
-    const [i0, i1, i2] = tris[lo];
+    const [i0, i1, i2] = triangles[lo];
     a.fromBufferAttribute(pos, i0);
     b.fromBufferAttribute(pos, i1);
     c.fromBufferAttribute(pos, i2);
@@ -99,11 +126,11 @@ function sampleParticlePositions(
     const u = 1 - root;
     const v = root * (1 - s2);
     const w = s2 * root;
-    out[p * 3] = a.x * u + b.x * v + c.x * w;
-    out[p * 3 + 1] = a.y * u + b.y * v + c.y * w;
-    out[p * 3 + 2] = a.z * u + b.z * v + c.z * w;
+    out[(offset + p) * 3] = a.x * u + b.x * v + c.x * w;
+    out[(offset + p) * 3 + 1] = a.y * u + b.y * v + c.y * w;
+    out[(offset + p) * 3 + 2] = a.z * u + b.z * v + c.z * w;
   }
-  return out;
+  return offset + count;
 }
 
 function makeColors(positions: Float32Array): Float32Array {
@@ -127,29 +154,40 @@ function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: Vi
   const { scene } = useGLTF(MODEL_URL);
   const group = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
-  const solidRef = useRef<THREE.Mesh>(null);
+  const solidsRef = useRef<THREE.Group>(null);
 
-  const mesh = useMemo<THREE.Mesh | null>(() => {
-    let found: THREE.Mesh | null = null;
+  const geometries = useMemo<THREE.BufferGeometry[]>(() => {
+    const all: THREE.BufferGeometry[] = [];
     scene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh && !found) {
-        found = obj as THREE.Mesh;
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh && mesh.geometry) {
+        all.push(mesh.geometry);
       }
     });
-    return found;
+    return all;
   }, [scene]);
 
-  const geometry = mesh ? mesh.geometry : null;
-
   const pointsGeometry = useMemo(() => {
-    if (!geometry) return null;
-    const positions = sampleParticlePositions(geometry, PARTICLE_COUNT);
+    if (!geometries.length) return null;
+    const positions = new Float32Array(PARTICLE_COUNT * 3);
+    const areas = geometries.map((g) => collectGeometryArea(g).totalArea);
+    const total = areas.reduce((sum, a) => sum + a, 0);
+    let offset = 0;
+    if (total > 0) {
+      for (let g = 0; g < geometries.length; g += 1) {
+        const share = Math.max(1, Math.round((areas[g] / total) * PARTICLE_COUNT));
+        offset = sampleForGeometry(geometries[g], share, positions, offset);
+      }
+    }
+    if (offset < PARTICLE_COUNT) {
+      sampleForGeometry(geometries[0], PARTICLE_COUNT - offset, positions, offset);
+    }
     const colors = makeColors(positions);
     const buffer = new THREE.BufferGeometry();
     buffer.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     buffer.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     return buffer;
-  }, [geometry]);
+  }, [geometries]);
 
   const dotTexture = useMemo(() => makeSoftDotTexture(), []);
 
@@ -202,9 +240,13 @@ function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: Vi
       mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "particles" ? 0.95 : 0, 6, k);
     }
 
-    if (solidRef.current) {
-      const mat = solidRef.current.material as THREE.MeshStandardMaterial;
-      mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "solid" ? 1 : 0.03, 6, k);
+    if (solidsRef.current) {
+      solidsRef.current.children.forEach((child) => {
+        const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+        if (mat) {
+          mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "solid" ? 1 : 0.03, 6, k);
+        }
+      });
     }
   });
 
@@ -224,19 +266,21 @@ function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: Vi
           />
         </points>
       ) : null}
-      {geometry ? (
-        <mesh ref={solidRef} geometry={geometry}>
-          <meshStandardMaterial
-            color="#d7e0f0"
-            metalness={0.85}
-            roughness={0.25}
-            emissive="#1e3a8a"
-            emissiveIntensity={0.2}
-            transparent
-            opacity={0.03}
-          />
-        </mesh>
-      ) : null}
+      <group ref={solidsRef}>
+        {geometries.map((geometry, i) => (
+          <mesh key={i} geometry={geometry}>
+            <meshStandardMaterial
+              color="#d7e0f0"
+              metalness={0.85}
+              roughness={0.25}
+              emissive="#1e3a8a"
+              emissiveIntensity={0.2}
+              transparent
+              opacity={0.03}
+            />
+          </mesh>
+        ))}
+      </group>
     </group>
   );
 }

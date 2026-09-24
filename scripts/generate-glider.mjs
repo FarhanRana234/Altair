@@ -23,8 +23,7 @@ if (typeof globalThis.FileReader === "undefined") {
     }
     readAsArrayBuffer(blob) {
       blob.arrayBuffer().then((buf) => {
-        const arrayBuffer = buf.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-        this.result = arrayBuffer;
+        this.result = buf;
         this._finish();
       });
     }
@@ -129,14 +128,15 @@ const scene = new THREE.Scene();
 scene.add(glider);
 
 const exporter = new GLTFExporter();
-const outPath = join(outDir, "glider.gltf");
+const outPath = join(outDir, "glider.glb");
 await exporter.parseAsync(scene, {
-  binary: false,
+  binary: true,
   onlyVisible: true,
 }).then((result) => {
-  writeFileSync(outPath, JSON.stringify(result));
-  console.log("GLTF written:", outPath);
+  const buffer = Buffer.from(result);
+  writeFileSync(outPath, buffer);
+  console.log("GLB written:", outPath);
   console.log("Vertices:", merged.attributes.position.count);
   console.log("Indices:", merged.index?.count ?? "none");
-  console.log("Size:", (Buffer.byteLength(JSON.stringify(result)) / 1024).toFixed(1), "KB");
+  console.log("Size:", (buffer.length / 1024).toFixed(1), "KB");
 });

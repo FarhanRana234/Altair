@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { AtSign, Linkedin, Mail, Phone } from "lucide-react";
+import OrganizedByCard from "./OrganizedByCard";
 
 const CONTACTS = [
   {
@@ -43,7 +44,7 @@ export default function Footer() {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="mb-16 flex flex-col items-center text-center"
         >
-          <p className="eyebrow mb-6">08 — Reach Out</p>
+          <p className="eyebrow mb-6">07 — Reach Out</p>
           <h2 className="section-heading">CONTACT</h2>
           <p className="section-body mt-4 max-w-xl">
             Interested in collaborating, sponsoring, or just want to follow the
@@ -104,6 +105,10 @@ export default function Footer() {
               </span>
             </motion.a>
           ))}
+        </div>
+
+        <div className="mt-24">
+          <OrganizedByCard />
         </div>
       </div>
 

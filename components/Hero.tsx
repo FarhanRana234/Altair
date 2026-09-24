@@ -1,9 +1,18 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
 export default function Hero() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const contentScale = useTransform(scrollYProgress, [0, 1], [1, 0.86]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0.2]);
+
   const scrollToNext = () => {
     const next = document.getElementById("aero-pakistan");
     next?.scrollIntoView({ behavior: "smooth" });
@@ -11,52 +20,44 @@ export default function Hero() {
 
   return (
     <section
+      ref={sectionRef}
       id="top"
-      className="relative flex h-screen min-h-[620px] w-full items-center justify-center overflow-hidden px-6"
+      className="relative flex h-screen min-h-[640px] w-full items-center justify-center overflow-hidden px-6"
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-space-deep/60 via-transparent to-space-deep/60" />
+      <div className="pointer-events-none absolute inset-0 z-[8] bg-gradient-to-b from-space-deep/60 via-transparent to-space-deep/60" />
 
       <motion.div
         initial={{ opacity: 0, y: 34 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="relative z-10 max-w-5xl text-center"
+        style={{ scale: contentScale, opacity: contentOpacity }}
+        className="relative z-10 max-w-6xl text-center"
       >
-        <div className="mb-8 flex items-center justify-center gap-3">
-          <span className="h-px w-10 bg-accent-cyan/50 sm:w-16" />
-          <p className="font-display text-xl font-light tracking-widest2 text-platinum sm:text-2xl">
-            ALTAIR
-          </p>
-          <span className="h-px w-10 bg-accent-cyan/50 sm:w-16" />
-        </div>
-
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, delay: 0.3 }}
           className="mb-6 text-[11px] font-light uppercase tracking-widest2 text-accent-cyan/80 sm:text-xs"
         >
-          AeroPakistan 2027 · NEDUET × CUST
+          Team Altair · AeroPakistan 2027
         </motion.p>
 
         <motion.h1
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 26 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.35, ease: "easeOut" }}
-          className="font-display text-[clamp(2.4rem,6.5vw,5.5rem)] font-light leading-[1.08] text-platinum [text-shadow:0_0_80px_rgba(0,240,255,0.2)]"
+          className="font-display text-[clamp(3.5rem,13vw,11rem)] font-thin leading-none tracking-[0.04em] text-platinum [text-shadow:0_0_90px_rgba(0,240,255,0.18)]"
         >
-          TAKING FLIGHT WAS NEVER THE{" "}
-          <span className="italic text-accent-cyan/90">DIFFICULT</span> PART
+          ALTAIR
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.7 }}
-          className="mx-auto mt-8 max-w-xl text-sm font-light tracking-wider text-slate-300/85 sm:text-base"
+          className="mx-auto mt-8 max-w-xl font-display text-xl font-light tracking-widest text-slate-300/90 sm:text-2xl"
         >
-          From particle dust to powered flight — scroll to watch ALTAIR
-          reconfigure itself through the air.
+          Engineering the future of flight
         </motion.p>
       </motion.div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import type { MotionValue } from "framer-motion";
 import { Boxes, Sparkles } from "lucide-react";
@@ -16,11 +16,13 @@ export default function HeroCanvas({ progress }: { progress: MotionValue<number>
         dpr={[1, 1.8]}
         camera={{ position: [0, 0, 7], fov: 42, near: 0.1, far: 50 }}
       >
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[4, 6, 6]} intensity={1.1} />
-        <directionalLight position={[-5, -3, 3]} intensity={0.35} color="#3b82f6" />
-        <pointLight position={[3, 2, 4]} intensity={30} color="#00f0ff" />
-        <GliderParticles progress={progress} mode={mode} />
+        <Suspense fallback={null}>
+          <ambientLight intensity={0.7} />
+          <directionalLight position={[4, 6, 6]} intensity={1.1} />
+          <directionalLight position={[-5, -3, 3]} intensity={0.35} color="#3b82f6" />
+          <pointLight position={[3, 2, 4]} intensity={30} color="#00f0ff" />
+          <GliderParticles progress={progress} mode={mode} />
+        </Suspense>
       </Canvas>
 
       <div className="pointer-events-none absolute right-4 bottom-4 z-20 sm:right-6 sm:bottom-6">
