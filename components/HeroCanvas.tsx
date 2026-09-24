@@ -14,7 +14,14 @@ import { LOCAL_GLIDER_URL, FALLBACK_GLIDER_URL } from "../lib/gltf";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const PATH_START = { x: -4, y: 2.5, rotX: 0.35, rotY: 0.55, rotZ: 0.15, scale: 1 };
+const PATH_START = {
+  x: -3.6,
+  y: 2.1,
+  rotX: -0.65,
+  rotY: 0.75,
+  rotZ: 0.2,
+  scale: 0.95,
+};
 
 export default function HeroCanvas() {
   const [mode, setMode] = useState<VisualMode>("particles");
@@ -33,17 +40,43 @@ export default function HeroCanvas() {
         defaults: { ease: "none" },
       });
 
-      // Single continuous sweep: top-left -> bottom-right, diagonal
-      // down-right across the full page scroll (scrub: 1).
-      tl.fromTo(target.current, PATH_START, {
-        x: 3.6,
-        y: -1.8,
-        rotX: 0.06,
-        rotY: -0.3,
-        rotZ: 0.12,
-        scale: 0.8,
-        duration: 1,
-      });
+      // Scroll 1: rotate to face right, glide straight to the right side.
+      tl.to(target.current, {
+        x: 4,
+        y: 2.0,
+        rotX: -0.1,
+        rotY: 1.45,
+        rotZ: 0.1,
+        duration: 0.3,
+      })
+        // Scroll 2: bank left and drop toward bottom-center / bottom-left.
+        .to(target.current, {
+          x: 0.6,
+          y: -0.8,
+          rotX: 0.25,
+          rotY: 0.5,
+          rotZ: -1.05,
+          duration: 0.25,
+        })
+        // Scroll 3: level out, wings level, nose up/forward at bottom-center.
+        .to(target.current, {
+          x: 0.1,
+          y: -1.7,
+          rotX: -0.3,
+          rotY: -0.1,
+          rotZ: 0,
+          duration: 0.25,
+        })
+        // Final scroll: slight diagonal facing top-right, pinned lower-center.
+        .to(target.current, {
+          x: 0.5,
+          y: -1.75,
+          rotX: -0.35,
+          rotY: 0.45,
+          rotZ: 0.18,
+          scale: 0.8,
+          duration: 0.2,
+        });
     });
     return () => ctx.revert();
   }, []);

@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import OrganizedByCard from "./OrganizedByCard";
 
 export default function AeroPakistanIntro() {
   return (
@@ -27,27 +26,6 @@ export default function AeroPakistanIntro() {
           ecosystem by promoting engineering, teamwork, innovation, and
           entrepreneurship among students aged approximately 15&ndash;19.
         </p>
-
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-          {["NUVEX Pvt. Ltd.", "NUST Formula Student Team"].map((org) => (
-            <span
-              key={org}
-              className="rounded-full border border-accent-blue/30 bg-accent-blue/10 px-5 py-2 font-sans text-xs font-light uppercase tracking-[0.25em] text-slate-200/90"
-            >
-              {org}
-            </span>
-          ))}
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
-        className="mt-10 w-full"
-      >
-        <OrganizedByCard />
       </motion.div>
     </section>
   );

@@ -8,7 +8,6 @@ type Member = {
   name: string;
   role: string;
   university: string;
-  bio: string;
   image: string;
 };
 
@@ -17,42 +16,36 @@ const MEMBERS: Member[] = [
     name: "Huriya Irfan",
     role: "Captain",
     university: "NEDUET",
-    bio: "Changed the track. Kept the vibe.",
     image: "/team/huriya.png",
   },
   {
     name: "Shamikh Khilji",
     role: "Aerodynamics",
     university: "NEDUET",
-    bio: "Nah, I'd win",
     image: "/team/shamikh.png",
   },
   {
     name: "Musaab Junaid",
     role: "CAD",
     university: "NEDUET",
-    bio: "No somersaults intended, I guess..",
     image: "/team/musaab.png",
   },
   {
     name: "Yamaan Ali",
     role: "Structures and Manufacturing",
     university: "NEDUET",
-    bio: "Baggin that highest engineering score fs",
     image: "/team/yamaan.png",
   },
   {
     name: "Hamna Maryam",
     role: "Project Manager",
     university: "CUST",
-    bio: "Stand back, we got this",
     image: "/team/humna.png",
   },
   {
     name: "Syeda Shanza Fatima",
     role: "CAD",
     university: "CUST",
-    bio: "See you with a goated glider on my side",
     image: "/team/shanza.png",
   },
 ];
@@ -76,7 +69,7 @@ function MemberCard({ member, index }: { member: Member; index: number }) {
       transition={{ duration: 0.7, delay: (index % 3) * 0.1, ease: "easeOut" }}
       className="glass-card group flex flex-col overflow-hidden transition-colors duration-300 hover:border-accent-cyan/40"
     >
-      <div className="relative aspect-[4/5] w-full overflow-hidden border-b border-cyan-500/30">
+      <div className="relative aspect-[4/5] w-full overflow-hidden">
         {imgFailed ? (
           <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-space to-space-deep">
             <span className="font-display text-4xl font-light tracking-widest text-accent-cyan/60">
@@ -98,23 +91,8 @@ function MemberCard({ member, index }: { member: Member; index: number }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-1.5 p-5">
-        <h3 className="font-display text-2xl font-medium tracking-wider text-platinum transition-colors group-hover:text-accent-cyan">
-          {member.name}
-        </h3>
-        <p className="font-sans text-xs font-medium uppercase tracking-widest text-accent-cyan">
-          {member.role}
-        </p>
-        <p className="mt-2 text-xs font-light leading-relaxed tracking-wide text-slate-300">
-          {member.bio}
-        </p>
-      </div>
-
-      <div className="mt-auto border-t border-accent-blue/20 px-5 py-4 text-center">
-        <span className="font-sans text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-          University
-        </span>
-        <span className="mt-0.5 block font-display text-lg font-medium tracking-widest text-platinum">
+      <div className="mt-auto border-t border-accent-blue/20 bg-slate-950/40 px-5 py-4 text-center">
+        <span className="font-display text-lg font-medium tracking-widest text-platinum">
           {member.university}
         </span>
       </div>
