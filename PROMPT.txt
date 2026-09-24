@@ -1,0 +1,109 @@
+# PROMPT.TXT — Master Generation Prompt for OpenCode
+
+You are a Senior Frontend Engineer and Creative Web Developer. Your task is to build the Hero section and complete landing page architecture for the website "ALTAIR" using Next.js (App Router), TypeScript, Tailwind CSS, Framer Motion, Three.js, and Web3Forms API for deployment on Vercel.
+
+================================================================================
+0. DOCUMENT REFERENCE & SOURCE OF TRUTH (LOCAL FILES)
+================================================================================
+You have access to the project specifications and design references in the working directory. Use the following files as your primary ground-truth sources:
+1. `context.md` — Synthesized design system, layout structure, feature specs, and copy.
+2. `altair_website_ui (1).pdf` — Visual UI mockup and structural design reference.
+3. `ALTAIR_SPONSORSHIP_PROPOSAL (1).pdf` — Complete text, metrics, team roster, budget, UN SDGs, and sponsorship tiers reference.
+
+If there is any ambiguity during generation, inspect and read `altair_website_ui (1).pdf` and `ALTAIR_SPONSORSHIP_PROPOSAL (1).pdf` in your directory to extract exact text strings, image positions, structural layouts, and numerical data.
+
+================================================================================
+1. ADVANCED ANIMATION, 3D & INTERACTIVE SPECIFICATIONS
+================================================================================
+
+A. Canvas Starfield Background (`Starfield.tsx`):
+- HTML5 Canvas particle system running continuously in the background matching the space motif in `altair_website_ui (1).pdf`.
+- 120+ star nodes with subtle drifting motion and opacity breathing (`sine` wave animation).
+- Connect nearby stars (within 100px) with thin vector lines.
+- Color palette: Pure White (`rgba(255, 255, 255, 0.8)`), Electric Blue (`rgba(0, 240, 255, 0.4)`), Deep Indigo (`rgba(59, 130, 246, 0.2)`).
+
+B. Hero Section Animations (AeroPakistan & PDF UI-Inspired):
+- 3D Parallax Glider Motion: Central diagonal glider photo with continuous vertical floating (`translateY: [0, -14, 0]` over 6 seconds).
+- Mouse Tilt Effect: Use Framer Motion's `useMotionValue` and `useTransform` to rotate the glider slightly based on cursor position (`rotateX` and `rotateY` between -10deg and +10deg).
+- Aceternity-style Container Scroll Reveal: On scroll, scale down the hero canvas slightly while fading in the "WHAT IS AERO PAKISTAN?" section smoothly into position.
+- "click to continue" CTA: Pulsing vertical arrow indicator (`translateY: [0, 8, 0]`) with smooth scroll trigger.
+
+C. 3D Glider Prototype Viewer (`Glider3DViewer.tsx`):
+- Built using `@react-three/fiber` and `@react-three/drei`.
+- Renders 3D model with OrbitControls (auto-rotate enabled with user override).
+- Includes floating canvas HUD controls to switch visual modes: "CAD Blueprint Wireframe" vs "Rendered Aircraft".
+
+D. Interactive Sponsorship Tier & Budget Explorer (`TierExplorer.tsx`):
+- Interactive range slider for sponsorship investment (PKR 30,000 to PKR 500,000+).
+- Dynamic tier highlight (Bronze, Silver, Gold, Platinum) with animated perk card reveals using Framer Motion (`AnimatePresence`).
+
+E. Web3Forms Sponsorship Lead Form & Modal (`SponsorshipFormModal.tsx`):
+- Glassmorphic modal popup triggerable from any "Sponsor Us" CTA button.
+- Captures name, email, company, target tier, and custom note.
+- Submits form payload to `https://api.web3forms.com/submit` using `process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY`.
+- On successful API response, triggers automatic browser download for `/ALTAIR_SPONSORSHIP_PROPOSAL.pdf` and shows success notification.
+
+F. Metric Counter Grid (Teach64-Inspired):
+- `<TrackRecord />` section using Framer Motion's `useInView`.
+- Animate high-contrast counter numbers from `0` to target values when scrolled into view:
+  - `1st` (Runners-Up Formula Pakistan 2026)
+  - `185.0` (Top National Engineering Score)
+  - `1,800+` (Expo Attendees)
+  - `6` (Multidisciplinary Engineers)
+  - `PKR 828,000` (Total Budget)
+
+================================================================================
+2. COMPONENT ARCHITECTURE & CONTENT SPECIFICATION
+================================================================================
+
+1. Navigation Bar (`Navbar.tsx`):
+   - Left: Lowercase `"altair"` wordmark in thin serif font.
+   - Right: Navigation links + glowing "Sponsor Us" CTA button opening the modal.
+
+2. Hero Screen Section (`Hero.tsx`):
+   - Center Display: Giant thin serif wordmark `"ALTAIR"`.
+   - Diagonal layout containing floating Glider image matching `altair_website_ui (1).pdf`.
+   - Bottom CTA: `"click to continue"` pulsing arrow.
+
+3. "WHAT IS AERO PAKISTAN?" (`AeroPakistanIntro.tsx`):
+   - Centered block detailing the national STEM competition, NUVEX, and NFST partnership.
+
+4. Track Record Metric Grid (`TrackRecord.tsx`):
+   - High-contrast stat cards inspired by Teach64 showing overall rank, scores, attendee numbers, and national media coverage (BBC Urdu, DAWN, ProPakistani).
+
+5. "PROJECT ALTAIR" & Prototype Showcase (`ProjectShowcase.tsx`):
+   - Right: "Project Altair - Engineering the future of flight".
+   - Left: `<Glider3DViewer />` card captioned "First prototype".
+
+6. "TEAM ALTAIR" & Quote Cards (`Team.tsx`):
+   - Left: Team mission and engineering goals.
+   - 2x3 Grid of glassmorphic team cards with member name, role, institution, and exact quotes:
+     1. Huriya Irfan (Captain) — "Changed the track. Kept the vibe."
+     2. Shamikh Khilji (Aerodynamics) — "Nah, I'd win"
+     3. Musaab Junaid (CAD) — "No somersaults intended, I guess.."
+     4. Yamaan Ali (Structures & Mfg) — "Baggin that highest engineering score fs"
+     5. Hamna Maryam (Project Manager) — "Stand back, we got this"
+     6. Syeda Shanza Fatima (CAD) — "See you with a goated glider on my side"
+
+7. "EVENTS" Section (`EventsSection.tsx`):
+   - Two columns: Karachi Community Race Event & Engineering Podcasts.
+   - Callout bar: "Follow us on instagram for further updates!".
+
+8. "SPONSOR US!" & Tiers (`Sponsorship.tsx`):
+   - Proposal intro text + Interactive PDF proposal download button.
+   - Embedded `<TierExplorer />` dynamic slider component.
+   - Embedded UN SDG badges (SDGs 4, 8, 9, 17).
+
+9. Contact & Footer (`Footer.tsx`):
+   - Contact handles: Instagram (@teamaltair__), Email (altair.aeropak@gmail.com), LinkedIn (Altair), and phone numbers (Huriya Irfan: 0310-1078428, Yamaan Ali: 0303-2390577).
+   - Bottom mark: Lowercase `"altair"` wordmark.
+
+================================================================================
+3. TECHNICAL & TYPOGRAPHY RULES
+================================================================================
+- Serif Class: `font-serif tracking-widest text-slate-100` (`Cormorant Garamond` or `Playfair Display`).
+- Body Class: `font-sans font-light tracking-wider text-slate-300/90`.
+- TypeScript: Fully typed components (no `any`).
+- Colors: Exact hex codes (`bg-[#030712]`, `text-[#00F0FF]`, `border-[#3B82F6]/20`).
+
+Generate the full component code files following these specifications.

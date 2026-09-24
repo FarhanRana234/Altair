@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" fill="none" role="img" aria-label="ALTAIR glider rendered in three-quarter view">
+  <defs>
+    <linearGradient id="body" x1="80" y1="520" x2="430" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0b132b" />
+      <stop offset="55%" stop-color="#1e2b4f" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b132b" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#123a5e" stop-opacity="0.85" />
+    </linearGradient>
+    <linearGradient id="wingEdge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.2" />
+    </linearGradient>
+    <linearGradient id="canopy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7defff" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#1c3a6e" stop-opacity="0.55" />
+    </linearGradient>
+    <linearGradient id="tail" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f1d3d" />
+      <stop offset="100%" stop-color="#2a4a86" />
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <path d="M348 466 L930 88 C900 46 872 40 842 40 C742 44 660 176 348 466 Z" fill="url(#wing)" opacity="0.92" stroke="url(#wingEdge)" stroke-width="2.5" />
+  <path d="M96 108 L250 256 L346 246 L244 88 Z" fill="url(#tail)" stroke="url(#wingEdge)" stroke-width="2" />
+
+  <path d="M150 470 L858 138" stroke="#00f0ff" stroke-width="2.5" stroke-opacity="0.85" filter="url(#glow)" />
+
+  <path d="M150 470 C248 348 372 272 548 200 C724 128 806 110 858 138 C762 164 662 214 548 318 C442 414 336 478 232 500 C204 491 175 481 150 470 Z" fill="url(#body)" stroke="#7a9dff" stroke-width="2" />
+
+  <path d="M320 420 C440 320 608 210 800 120" stroke="#e2e8f0" stroke-width="1.25" stroke-opacity="0.55" />
+
+  <ellipse cx="432" cy="252" rx="54" ry="22" transform="rotate(-33 432 252)" fill="url(#canopy)" stroke="#aef3ff" stroke-opacity="0.7" stroke-width="1.5" />
+
+  <path d="M212 488 L186 536 M180 512 L150 556" stroke="#00f0ff" stroke-width="3" stroke-opacity="0.7" stroke-linecap="round" />
+
+  <path d="M242 44 L250 256" stroke="#0b132b" stroke-width="12" stroke-linecap="round" opacity="0.35" />
+
+  <circle cx="232" cy="500" r="4" fill="#00f0ff" opacity="0.85" />
+  <circle cx="812" cy="122" r="5.5" fill="#00f0ff" opacity="0.9" filter="url(#glow)" />
+</svg>
