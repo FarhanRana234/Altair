@@ -114,7 +114,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
             exit={{ opacity: 0, scale: 0.96, y: 16 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()}
-            className="glass-card max-h-[90vh] w-full max-w-lg overflow-y-auto border-accent-cyan/20 p-8"
+            className="glass-card max-h-[90vh] w-full max-w-[90vw] overflow-y-auto border-accent-cyan/20 p-8 sm:max-w-lg"
           >
             <div className="mb-6 flex items-start justify-between">
               <div>

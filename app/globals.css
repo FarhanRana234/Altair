@@ -39,6 +39,8 @@ body {
 @layer components {
   .glass-card {
     @apply border border-accent-blue/20 bg-slate-900/40 backdrop-blur-md rounded-2xl;
+    max-width: 90vw;
+    overflow-y: auto;
   }
 
   .section-heading {

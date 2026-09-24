@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion, type Variants } from "framer-motion";
 
 const LINKS = [
@@ -40,22 +39,6 @@ export default function Navbar({ onSponsorClick }: { onSponsorClick: () => void 
           className="font-display text-2xl font-light tracking-widest2 text-platinum transition-colors hover:text-accent-cyan"
         >
           altair
-        </a>
-        <a
-          href="#aero-pakistan"
-          className="hidden items-center gap-2 rounded-full border border-white/10 bg-slate-900/50 px-3 py-1.5 backdrop-blur-sm transition-colors hover:border-accent-cyan/30 sm:flex"
-        >
-          <Image
-            src="/assets/ap-logo-footer.webp"
-            alt="Aero Pakistan Logo"
-            width={61}
-            height={24}
-            priority
-            className="h-6 w-auto"
-          />
-          <span className="whitespace-nowrap font-sans text-[10px] font-light uppercase tracking-widest2 text-slate-400">
-            In Partnership with AeroPakistan
-          </span>
         </a>
       </motion.div>
 

@@ -46,7 +46,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 26 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.2, delay: 0.35, ease: "easeOut" }}
-          className="font-display text-[clamp(3.5rem,13vw,11rem)] font-thin leading-none tracking-[0.04em] text-platinum [text-shadow:0_0_90px_rgba(0,240,255,0.18)]"
+          className="font-display text-5xl font-thin leading-none tracking-[0.04em] text-platinum sm:text-7xl md:text-8xl [text-shadow:0_0_90px_rgba(0,240,255,0.18)]"
         >
           ALTAIR
         </motion.h1>

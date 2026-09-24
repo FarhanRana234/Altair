@@ -14,19 +14,19 @@ const MODEL_URL = "/models/glider.glb";
 useGLTF.preload(MODEL_URL);
 
 // Whole-page scroll trajectory (progress 0 = hero top, 1 = footer bottom).
-// 0%  -> glider sits in the TOP-LEFT corner, pitched diagonally down toward center
-// 30-60% -> sweeps diagonal across to MIDDLE-RIGHT while banking along its wing axis
-// 70-100% -> descends toward BOTTOM-CENTER / BOTTOM-LEFT, leveling out above the footer
-const KEYFRAMES = [0, 0.3, 0.6, 0.8, 1];
+// 0% -> 50%:  pinned TOP-LEFT (X: -2.5...-1.5, Y: 2.0), gentle drift/floating in place
+// 50% -> 100%: begins primary descent, sweeping diagonally down toward bottom-center/left,
+//              resting level above the footer
+const KEYFRAMES = [0, 0.5, 0.65, 0.8, 1];
 
-const POS_X = [-3.0, 0.4, 2.9, 0.4, -1.7];
-const POS_Y = [1.7, 0.85, -0.15, -1.55, -1.7];
-const ROT_X = [0.6, 0.5, 0.32, 0.14, 0.06];
-const ROT_Y = [0.85, 0.55, 0.1, -0.2, -0.3];
-const ROT_Z = [0.2, 0.95, 1.35, 0.4, 0.15];
-const SCALE = [0.85, 1.05, 1.18, 1.0, 0.85];
+const POS_X = [-2.2, -1.75, 0.4, -0.6, -1.6];
+const POS_Y = [2.0, 2.0, 0.6, -1.2, -1.7];
+const ROT_X = [0.35, 0.4, 0.3, 0.15, 0.06];
+const ROT_Y = [0.6, 0.55, 0.2, -0.15, -0.3];
+const ROT_Z = [0.15, 0.2, 1.1, 0.45, 0.12];
+const SCALE = [1.0, 1.05, 1.18, 1.0, 0.85];
 
-const PARTICLE_COUNT = 9000;
+const PARTICLE_COUNT = 4500;
 
 function makeSoftDotTexture(): THREE.CanvasTexture {
   const size = 64;
@@ -214,6 +214,10 @@ function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: Vi
     const t = state.clock.elapsedTime;
     const k = Math.min(delta, 0.1);
     const c = current.current;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const xFactor = isMobile ? 0.55 : 1;
+    const scaleFactor = isMobile ? 0.55 : 1;
+    const halfW = state.viewport.width / 2 - 0.3;
 
     c.rotX = THREE.MathUtils.damp(c.rotX, rotX.get(), 4, k);
     c.rotY = THREE.MathUtils.damp(c.rotY, rotY.get(), 4, k);
@@ -221,17 +225,24 @@ function GliderRig({ progress, mode }: { progress: MotionValue<number>; mode: Vi
     c.posX = THREE.MathUtils.damp(c.posX, posX.get(), 4, k);
     c.posY = THREE.MathUtils.damp(c.posY, posY.get(), 4, k);
     c.scale = THREE.MathUtils.damp(c.scale, scale.get(), 4, k);
-    c.pointerX = THREE.MathUtils.damp(c.pointerX, state.pointer.x * 0.35, 3, k);
+    c.pointerX = THREE.MathUtils.damp(
+      c.pointerX,
+      state.pointer.x * 0.35 * (isMobile ? 0.6 : 1),
+      3,
+      k
+    );
 
     if (group.current) {
       group.current.rotation.set(
         c.rotX,
-        c.rotY + c.pointerX * 0.12,
+        c.rotY + c.pointerX * 0.12 + Math.sin(t * 0.5) * 0.04,
         c.rotZ
       );
-      const float = Math.sin(t * 0.8) * 0.04;
-      group.current.position.set(c.posX + c.pointerX, c.posY + float, 0);
-      group.current.scale.setScalar(c.scale);
+      const float = Math.sin(t * 0.8) * 0.05;
+      const baseX = (c.posX + c.pointerX) * xFactor;
+      const clampedX = THREE.MathUtils.clamp(baseX, -halfW, halfW);
+      group.current.position.set(clampedX, c.posY + float, 0);
+      group.current.scale.setScalar(c.scale * scaleFactor);
     }
 
     if (pointsRef.current) {

@@ -12,8 +12,9 @@ export default function HeroCanvas({ progress }: { progress: MotionValue<number>
   return (
     <div className="pointer-events-none fixed inset-0 z-[6]">
       <Canvas
+        frameloop="always"
         gl={{ antialias: true, alpha: true }}
-        dpr={[1, 1.8]}
+        dpr={[1, 1.5]}
         camera={{ position: [0, 0, 7], fov: 42, near: 0.1, far: 50 }}
       >
         <Suspense fallback={null}>
