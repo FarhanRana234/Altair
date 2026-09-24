@@ -33,24 +33,15 @@ export default function HeroCanvas() {
         defaults: { ease: "none" },
       });
 
-      // Phase 1 (0% -> 50% scroll): top-left -> top-right, gentle banking.
-      tl.to(target.current, {
-        x: 4,
-        y: 2.5,
-        rotX: 0.4,
-        rotY: -0.15,
-        rotZ: -0.2,
-        duration: 1,
-      });
-
-      // Phase 2 (50% -> 100% scroll): drop vertically down to bottom-right.
-      tl.to(target.current, {
-        x: 4,
-        y: -2.5,
+      // Single continuous sweep: top-left -> bottom-right, diagonal
+      // down-right across the full page scroll (scrub: 1).
+      tl.fromTo(target.current, PATH_START, {
+        x: 3.6,
+        y: -1.8,
         rotX: 0.06,
         rotY: -0.3,
         rotZ: 0.12,
-        scale: 0.85,
+        scale: 0.8,
         duration: 1,
       });
     });
