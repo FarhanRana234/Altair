@@ -91,18 +91,8 @@ export default function HeroCanvas() {
         const canvas = document.createElement("canvas");
         const gl =
           canvas.getContext("webgl2") ||
-          canvas.getContext("webgl") ||
-          canvas.getContext("experimental-webgl");
-        if (!gl) return false;
-        const ctx = gl as WebGLRenderingContext;
-        if (typeof ctx.isContextLost === "function" && ctx.isContextLost()) {
-          return false;
-        }
-        const loseExt = ctx.getExtension("WEBGL_lose_context");
-        if (loseExt) {
-          loseExt.loseContext();
-        }
-        return true;
+          canvas.getContext("webgl");
+        return !!gl;
       } catch {
         return false;
       }

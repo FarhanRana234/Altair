@@ -39,7 +39,7 @@ export default function Hero() {
           transition={{ duration: 1.2, delay: 0.25 }}
           className="mb-5 font-mono text-[11px] font-normal uppercase tracking-[0.32em] text-[#7DA7D9] sm:text-xs"
         >
-          Team Altair · AeroPakistan 2027
+          AeroPakistan 2027
         </motion.p>
 
         <motion.h1
