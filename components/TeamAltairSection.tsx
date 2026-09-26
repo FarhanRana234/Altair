@@ -90,7 +90,7 @@ export default function TeamAltairSection() {
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="text-center"
       >
-        <p className="eyebrow mb-6">02 — The Team</p>
+        <p className="eyebrow mb-6">The Team</p>
         <h2 className="section-heading mb-8">TEAM ALTAIR</h2>
         <p className="section-body mx-auto max-w-3xl text-base sm:text-lg text-slate-200">
           ALTAIR is a team of 6 passionate individuals building a glider for

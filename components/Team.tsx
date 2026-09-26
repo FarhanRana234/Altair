@@ -114,7 +114,7 @@ export default function Team() {
         className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
       >
         <div className="max-w-2xl">
-          <p className="eyebrow mb-6">04 — The Crew</p>
+          <p className="eyebrow mb-6">The Crew</p>
           <h2 className="section-heading text-left">TEAM ALTAIR</h2>
         </div>
         <div className="max-w-xl">

@@ -24,7 +24,7 @@ export default function EventsSection() {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="mb-14 flex flex-col items-center text-center"
         >
-          <p className="eyebrow mb-6">05 — Outreach</p>
+          <p className="eyebrow mb-6">Outreach</p>
           <h2 className="section-heading mb-6">EVENTS</h2>
           <p className="section-body max-w-3xl text-base sm:text-lg text-slate-200">
             We are planning to do two social events to maximize our reach and

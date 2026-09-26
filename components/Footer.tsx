@@ -45,7 +45,7 @@ export default function Footer() {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="mb-14 flex flex-col items-center text-center"
         >
-          <p className="eyebrow mb-6">07 — Reach Out</p>
+          <p className="eyebrow mb-6">Reach Out</p>
           <h2 className="section-heading mb-4">CONTACT</h2>
           <p className="section-body max-w-xl text-slate-300">
             Interested in collaborating, sponsoring, or tracking our flight?

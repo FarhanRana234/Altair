@@ -45,6 +45,42 @@ useGLTF.preload(LOCAL_GLIDER_URL);
 
 const PARTICLE_COUNT = 4500;
 
+const particleVertexShader = `
+  attribute vec3 a_target;
+  attribute float a_size;
+  uniform float u_time;
+  uniform float u_transition;
+  uniform vec3 u_mouse;
+  varying vec3 v_color;
+  varying float v_alpha;
+
+  void main() {
+    vec3 base = mix(position, a_target, smoothstep(0.0, 1.0, u_transition));
+    vec3 delta = base - u_mouse;
+    float distanceToPointer = length(delta);
+    float influence = exp(-distanceToPointer * distanceToPointer * 7.0);
+    vec3 displaced = base + normalize(delta + vec3(0.0001)) * influence * 0.11;
+    displaced += vec3(0.0, sin(u_time * 0.55 + position.x * 8.0) * 0.004, 0.0);
+    vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
+    gl_Position = projectionMatrix * mvPosition;
+    gl_PointSize = a_size * (300.0 / max(1.0, -mvPosition.z));
+    v_color = color;
+    v_alpha = 0.72 + influence * 0.28;
+  }
+`;
+
+const particleFragmentShader = `
+  uniform sampler2D u_map;
+  varying vec3 v_color;
+  varying float v_alpha;
+
+  void main() {
+    vec4 texel = texture2D(u_map, gl_PointCoord);
+    if (texel.a < 0.04) discard;
+    gl_FragColor = vec4(v_color, texel.a * v_alpha);
+  }
+`;
+
 type RigProps = {
   url: string;
   target: React.MutableRefObject<GliderTarget>;
@@ -225,9 +261,21 @@ function GliderRig({ url, target, mode }: RigProps) {
     }
 
     const colors = makeColors(positions);
+    const targets = new Float32Array(PARTICLE_COUNT * 3);
+    for (let i = 0; i < PARTICLE_COUNT; i += 1) {
+      const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
+      const radius = 0.62 + (i % 17) * 0.006;
+      targets[i * 3] = Math.cos(angle) * radius;
+      targets[i * 3 + 1] = Math.sin(angle) * radius * 0.42;
+      targets[i * 3 + 2] = Math.sin(angle * 3.0) * 0.035;
+    }
+    const sizes = new Float32Array(PARTICLE_COUNT);
+    for (let i = 0; i < PARTICLE_COUNT; i += 1) sizes[i] = 0.012 + Math.random() * 0.018;
     const buffer = new THREE.BufferGeometry();
     buffer.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     buffer.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    buffer.setAttribute("a_target", new THREE.BufferAttribute(targets, 3));
+    buffer.setAttribute("a_size", new THREE.BufferAttribute(sizes, 1));
     return buffer;
   }, [geometries, normalization]);
 
@@ -258,6 +306,12 @@ function GliderRig({ url, target, mode }: RigProps) {
   const prevAngle = useRef<number>(27.7);
   const bankAngle = useRef<number>(0);
   const currentPointerX = useRef(0);
+  const shaderUniforms = useMemo(() => ({
+    u_time: { value: 0 },
+    u_transition: { value: 0 },
+    u_mouse: { value: new THREE.Vector3(10, 10, 10) },
+    u_map: { value: dotTexture },
+  }), [dotTexture]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1);
@@ -299,6 +353,17 @@ function GliderRig({ url, target, mode }: RigProps) {
     }
 
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+    shaderUniforms.u_time.value = t;
+    shaderUniforms.u_transition.value = THREE.MathUtils.damp(
+      shaderUniforms.u_transition.value,
+      mode === "particles" ? 0 : 1,
+      2.8,
+      dt,
+    );
+    shaderUniforms.u_mouse.value.x = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.x, state.pointer.x * 0.85, 4.5, dt);
+    shaderUniforms.u_mouse.value.y = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.y, state.pointer.y * 0.58, 4.5, dt);
+    shaderUniforms.u_mouse.value.z = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.z, 0, 4.5, dt);
 
     // Smoothly and slowly damp position towards scroll target
     c.x = THREE.MathUtils.damp(c.x, tgt.x, 3.5, dt);
@@ -400,16 +465,16 @@ function GliderRig({ url, target, mode }: RigProps) {
 
   return (
     <group ref={positionGroup}>
-      <group ref={rotationGroup}>
+      <group rotation={[0.18, -0.1, 0.16]}>
+        <group ref={rotationGroup}>
         {pointsGeometry ? (
           <points ref={pointsRef} geometry={pointsGeometry} frustumCulled={false}>
-            <pointsMaterial
-              map={dotTexture}
+            <shaderMaterial
+              uniforms={shaderUniforms}
+              vertexShader={particleVertexShader}
+              fragmentShader={particleFragmentShader}
               vertexColors
-              size={0.026}
-              sizeAttenuation
               transparent
-              opacity={0.95}
               depthWrite={false}
               blending={THREE.AdditiveBlending}
             />
@@ -431,6 +496,7 @@ function GliderRig({ url, target, mode }: RigProps) {
               </mesh>
             ))}
           </group>
+        </group>
         </group>
       </group>
     </group>
