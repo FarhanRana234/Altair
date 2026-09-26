@@ -18,8 +18,7 @@ export default function ProjectShowcase() {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="text-left"
         >
-          <p className="eyebrow mb-6">04 — The Machine</p>
-          <h2 className="section-heading text-left mb-6">OUR PROJECT</h2>
+              <h2 className="section-heading text-left mb-6">OUR PROJECT</h2>
           <p className="section-body text-base sm:text-lg leading-relaxed text-slate-200">
             We are aimimg to engineer a glider which will be able for flight
             withstanding all the potential forces acting on it. Moreover, our
@@ -47,14 +46,8 @@ export default function ProjectShowcase() {
               <span className="font-mono text-xs font-normal uppercase tracking-widest text-slate-300">
                 (3D VIEWPORT)
               </span>
-              <span className="font-display text-sm tracking-[0.2em] font-normal uppercase text-[#7DA7D9]">
-                OUR GLIDER
-              </span>
             </div>
           </div>
-          <span className="mt-3 font-display text-base tracking-[0.25em] uppercase text-slate-300">
-            OUR GLIDER
-          </span>
         </motion.div>
       </div>
     </section>

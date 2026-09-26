@@ -25,8 +25,7 @@ export default function Sponsorship({ onSponsorClick }: { onSponsorClick: () => 
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="lg:sticky lg:top-28 lg:self-start"
         >
-          <p className="eyebrow mb-6">06 — Partnership</p>
-          <h2 className="section-heading text-left mb-6">SPONSOR US!</h2>
+              <h2 className="section-heading text-left mb-6">SPONSOR US!</h2>
           <p className="section-body text-base sm:text-lg leading-relaxed text-slate-200">
             ALTAIR presents an opportunity to collaborate and support the young
             talent in Engineering and Aerospace. Following is the Sponsorship

@@ -111,8 +111,7 @@ export default function MeetTheTeamCarousel() {
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="text-center mb-12 sm:mb-16"
       >
-        <p className="eyebrow mb-6">03 — The People</p>
-        <h2 className="section-heading">MEET THE TEAM</h2>
+          <h2 className="section-heading">MEET THE TEAM</h2>
       </motion.div>
 
       {/* Swipeable Carousel Card */}
