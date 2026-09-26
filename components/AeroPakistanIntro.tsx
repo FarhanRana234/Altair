@@ -15,8 +15,7 @@ export default function AeroPakistanIntro() {
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="flex flex-col items-center text-center"
       >
-        <p className="eyebrow mb-6">The Arena</p>
-        <h2 className="section-heading mb-10 text-center">
+          <h2 className="section-heading mb-10 text-center">
           WHAT IS AERO PAKISTAN?
         </h2>
         <div className="glass-card p-8 sm:p-12 lg:p-14 text-center max-w-4xl border border-[#446391]/30 bg-[#071834]/80">

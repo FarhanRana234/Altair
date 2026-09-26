@@ -96,7 +96,6 @@ export default function TrackRecord() {
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="mb-14 flex flex-col items-center text-center"
       >
-        <p className="eyebrow mb-4">Track Record</p>
         <h2 className="section-heading">BUILT ON PROVEN WINGS</h2>
         <p className="section-body mt-4 max-w-2xl">
           ALTAIR is the direct successor to Team DriftX — 1st Runners-Up at

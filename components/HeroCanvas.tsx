@@ -17,6 +17,9 @@ export type RelativeWaypoint = {
   xPct: number;
   yPct: number;
   scale: number;
+  rotX: number;
+  rotY: number;
+  rotZ: number;
   duration: number;
 };
 
@@ -27,13 +30,13 @@ export type RelativeWaypoint = {
 // 4. Settles gently at centre bottom (Sponsorship / Footer) slowly
 export const FLIGHT_WAYPOINTS: RelativeWaypoint[] = [
   // 1. Start at Left Top (Hero screen)
-  { xPct: -0.62, yPct: 0.76, scale: 1.0, duration: 0 },
-  // 2. Smooth glide to Right Bottom
-  { xPct: 0.58, yPct: 0.14, scale: 0.96, duration: 0.36 },
-  // 3. Sweep across to Left Bottom
-  { xPct: -0.55, yPct: -0.46, scale: 0.92, duration: 0.36 },
-  // 4. Descend into Centre Bottom slowly
-  { xPct: 0.0, yPct: -0.80, scale: 0.88, duration: 0.28 },
+  { xPct: -0.62, yPct: 0.76, scale: 1.0, rotX: 0.08, rotY: -0.08, rotZ: -0.12, duration: 0 },
+  // 2. Sweep right while banking into the first curve
+  { xPct: 0.58, yPct: 0.14, scale: 0.96, rotX: -0.04, rotY: 0.12, rotZ: 0.2, duration: 0.36 },
+  // 3. Cross left in an S-curve
+  { xPct: -0.55, yPct: -0.46, scale: 0.92, rotX: 0.1, rotY: -0.16, rotZ: -0.24, duration: 0.36 },
+  // 4. Pitch down into the apply/footer area
+  { xPct: 0.0, yPct: -0.80, scale: 0.88, rotX: -0.28, rotY: 0.18, rotZ: 0.12, duration: 0.28 },
 ];
 
 export function getViewportBounds() {
@@ -55,7 +58,7 @@ export function getViewportBounds() {
 export function computeWaypointPos(
   wp: RelativeWaypoint,
   bounds: ReturnType<typeof getViewportBounds>
-) {
+  ): GliderTarget {
   const marginX = bounds.isMobile ? (bounds.isLandscape ? 0.35 : 0.45) : 0.4;
   const marginY = 0.45;
   const safeHalfW = Math.max(0.6, bounds.halfW - marginX);
@@ -73,6 +76,9 @@ export function computeWaypointPos(
     x: wp.xPct * safeHalfW,
     y: wp.yPct * safeHalfH,
     scale: wp.scale * deviceScale,
+    rotX: wp.rotX,
+    rotY: wp.rotY,
+    rotZ: wp.rotZ,
   };
 }
 
@@ -82,6 +88,9 @@ export default function HeroCanvas() {
     x: -1.6,
     y: 1.4,
     scale: 0.52,
+    rotX: 0.08,
+    rotY: -0.08,
+    rotZ: -0.12,
   });
 
   useEffect(() => {
@@ -112,6 +121,9 @@ export default function HeroCanvas() {
       target.current.x = staticPos.x;
       target.current.y = staticPos.y;
       target.current.scale = staticPos.scale;
+      target.current.rotX = FLIGHT_WAYPOINTS[0].rotX;
+      target.current.rotY = FLIGHT_WAYPOINTS[0].rotY;
+      target.current.rotZ = FLIGHT_WAYPOINTS[0].rotZ;
       return;
     }
 
@@ -130,6 +142,9 @@ export default function HeroCanvas() {
         target.current.x = p0.x;
         target.current.y = p0.y;
         target.current.scale = p0.scale;
+        target.current.rotX = p0.rotX;
+        target.current.rotY = p0.rotY;
+        target.current.rotZ = p0.rotZ;
       }
 
       tl = gsap.timeline({
@@ -149,6 +164,9 @@ export default function HeroCanvas() {
           x: p.x,
           y: p.y,
           scale: p.scale,
+          rotX: FLIGHT_WAYPOINTS[i].rotX,
+          rotY: FLIGHT_WAYPOINTS[i].rotY,
+          rotZ: FLIGHT_WAYPOINTS[i].rotZ,
           duration: FLIGHT_WAYPOINTS[i].duration,
         });
       }

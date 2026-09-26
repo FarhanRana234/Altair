@@ -18,8 +18,7 @@ export default function ProjectShowcase() {
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="text-left"
         >
-          <p className="eyebrow mb-6">The Machine</p>
-          <h2 className="section-heading text-left mb-6">OUR PROJECT</h2>
+              <h2 className="section-heading text-left mb-6">OUR PROJECT</h2>
           <p className="section-body text-base sm:text-lg leading-relaxed text-slate-200">
             We are aimimg to engineer a glider which will be able for flight
             withstanding all the potential forces acting on it. Moreover, our

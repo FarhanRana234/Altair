@@ -16,9 +16,9 @@ export type GliderTarget = {
   x: number;
   y: number;
   scale: number;
-  rotX?: number;
-  rotY?: number;
-  rotZ?: number;
+  rotX: number;
+  rotY: number;
+  rotZ: number;
 };
 
 /**
@@ -305,6 +305,7 @@ function GliderRig({ url, target, mode }: RigProps) {
   const currentAngle = useRef<number>(27.7);
   const prevAngle = useRef<number>(27.7);
   const bankAngle = useRef<number>(0);
+  const currentRotation = useRef({ rotX: target.current.rotX, rotY: target.current.rotY, rotZ: target.current.rotZ });
   const currentPointerX = useRef(0);
   const shaderUniforms = useMemo(() => ({
     u_time: { value: 0 },
@@ -368,7 +369,10 @@ function GliderRig({ url, target, mode }: RigProps) {
     // Smoothly and slowly damp position towards scroll target
     c.x = THREE.MathUtils.damp(c.x, tgt.x, 3.5, dt);
     c.y = THREE.MathUtils.damp(c.y, tgt.y, 3.5, dt);
-    c.scale = THREE.MathUtils.damp(c.scale, tgt.scale, 3.5, dt);
+      c.scale = THREE.MathUtils.damp(c.scale, tgt.scale, 3.5, dt);
+    currentRotation.current.rotX = THREE.MathUtils.damp(currentRotation.current.rotX, tgt.rotX, 3.5, dt);
+    currentRotation.current.rotY = THREE.MathUtils.damp(currentRotation.current.rotY, tgt.rotY, 3.5, dt);
+    currentRotation.current.rotZ = THREE.MathUtils.damp(currentRotation.current.rotZ, tgt.rotZ, 3.5, dt);
 
     // Parallax pointer sway
     currentPointerX.current = THREE.MathUtils.damp(
@@ -446,6 +450,9 @@ function GliderRig({ url, target, mode }: RigProps) {
       // Construct orthonormal basis: Column 0 = r (+X), Column 1 = u (+Y), Column 2 = zWorld (+Z)
       const m = new THREE.Matrix4().makeBasis(r, u, zWorld);
       rotationGroup.current.quaternion.setFromRotationMatrix(m);
+      rotationGroup.current.rotateX(currentRotation.current.rotX);
+      rotationGroup.current.rotateY(currentRotation.current.rotY);
+      rotationGroup.current.rotateZ(currentRotation.current.rotZ);
     }
 
     if (pointsRef.current) {

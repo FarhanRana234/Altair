@@ -22,7 +22,8 @@ const COLORS = [
 
 function getStarCount(width: number, height: number) {
   const area = width * height;
-  return Math.round(Math.min(3600, Math.max(700, area / 5000)));
+  const density = width >= 1200 ? 2600 : width >= 768 ? 2100 : 1500;
+  return Math.round(Math.min(density, Math.max(900, area / (width >= 768 ? 2600 : 3400))));
 }
 
 function buildStars(count: number, width: number, height: number): Star[] {

@@ -114,9 +114,7 @@ export default function Team() {
         className="mb-14 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
       >
         <div className="max-w-2xl">
-          <p className="eyebrow mb-6">The Crew</p>
-          <h2 className="section-heading text-left">TEAM ALTAIR</h2>
-        </div>
+            </div>
         <div className="max-w-xl">
           <p className="section-body">
             ALTAIR is a team of 6 passionate individuals building a glider for
