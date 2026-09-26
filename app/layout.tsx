@@ -1,28 +1,31 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Bodoni_Moda, Lekton } from "next/font/google";
 import "./globals.css";
 
-const display = Cormorant_Garamond({
+const display = Bodoni_Moda({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
+  weight: ["400", "500", "600"],
   variable: "--font-display",
   display: "swap",
 });
 
-const sans = Inter({
+const mono = Lekton({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-sans",
+  weight: ["400", "700"],
+  variable: "--font-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "ALTAIR — AeroPakistan 2027",
+  title: "ALTAIR — wingspans beyond the stars.",
   description:
     "ALTAIR is a student-led engineering team from NEDUET and CUST designing, building, and racing a next-generation glider for AeroPakistan 2027.",
-  metadataBase: new URL("https://altair-aeropak.vercel.app"),
+  icons: {
+    icon: "/brand/crane-icon-favicon.svg",
+    apple: "/brand/crane-icon-favicon.svg",
+  },
   openGraph: {
-    title: "ALTAIR — AeroPakistan 2027",
+    title: "ALTAIR — wingspans beyond the stars.",
     description:
       "ALTAIR is a student-led engineering team from NEDUET and CUST designing, building, and racing a next-generation glider for AeroPakistan 2027.",
     type: "website",
@@ -35,8 +38,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable}`}>
-      <body className="bg-space-deep text-platinum antialiased">
+    <html lang="en" className={`${display.variable} ${mono.variable}`}>
+      <body className="bg-navy-bg text-white antialiased font-mono">
         {children}
       </body>
     </html>

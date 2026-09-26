@@ -23,9 +23,9 @@ const TIERS: Tier[] = [
     name: "Bronze",
     range: "PKR 30,000 – 50,000",
     min: 30000,
-    stroke: "#c08552",
-    text: "text-amber-700/90",
-    glow: "shadow-[0_0_30px_rgba(192,133,82,0.25)]",
+    stroke: "#446391",
+    text: "text-[#446391]",
+    glow: "shadow-[0_0_24px_rgba(68,99,145,0.35)]",
     perks: [
       "Logo on standard team merchandise",
       "Promotional brochures at AeroPakistan stall",
@@ -38,9 +38,9 @@ const TIERS: Tier[] = [
     name: "Silver",
     range: "PKR 60,000 – 90,000",
     min: 60000,
-    stroke: "#cbd5e1",
-    text: "text-slate-300",
-    glow: "shadow-[0_0_30px_rgba(203,213,225,0.25)]",
+    stroke: "#6484B5",
+    text: "text-[#6484B5]",
+    glow: "shadow-[0_0_24px_rgba(100,132,181,0.35)]",
     perks: [
       "Logo on standard team merchandise",
       "Promotional brochures at AeroPakistan stall",
@@ -56,9 +56,9 @@ const TIERS: Tier[] = [
     name: "Gold",
     range: "PKR 250,000 – 500,000",
     min: 250000,
-    stroke: "#f59e0b",
-    text: "text-gold",
-    glow: "shadow-[0_0_30px_rgba(245,158,11,0.3)]",
+    stroke: "#7DA7D9",
+    text: "text-[#7DA7D9]",
+    glow: "shadow-[0_0_24px_rgba(125,167,217,0.35)]",
     perks: [
       "Everything in Silver",
       "Prominent glider logo",
@@ -72,9 +72,9 @@ const TIERS: Tier[] = [
     name: "Platinum · Title Sponsor",
     range: "PKR 500,000+",
     min: 500000,
-    stroke: "#00f0ff",
-    text: "text-accent-cyan",
-    glow: "shadow-[0_0_30px_rgba(0,240,255,0.3)]",
+    stroke: "#FFFFFF",
+    text: "text-white",
+    glow: "shadow-[0_0_28px_rgba(255,255,255,0.4)]",
     perks: [
       "Title naming rights — “Altair, powered by [Brand]”",
       "Dominant full glider livery design",
@@ -108,11 +108,11 @@ export default function TierExplorer() {
       <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow mb-2">Investment Explorer</p>
-          <h3 className="font-display text-3xl font-light tracking-wider text-platinum">
+          <h3 className="font-display text-2xl sm:text-3xl font-normal tracking-wider text-white">
             Allocate your budget
           </h3>
         </div>
-        <div className="font-display text-3xl font-light tabular-nums text-accent-cyan">
+        <div className="font-display text-2xl sm:text-3xl font-normal tabular-nums text-[#7DA7D9]">
           {atCap ? "PKR 500,000+" : formatPKR(budget)}
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function TierExplorer() {
         className="w-full"
       />
 
-      <div className="mt-3 flex justify-between font-sans text-[11px] font-light uppercase tracking-widest text-slate-500">
+      <div className="mt-3 flex justify-between font-mono text-[11px] font-normal uppercase tracking-widest text-slate-400">
         <span>30,000</span>
         <span>500,000+</span>
       </div>
@@ -143,16 +143,16 @@ export default function TierExplorer() {
               onClick={() => setBudget(t.min)}
               className={`cursor-pointer rounded-xl border px-4 py-4 text-center backdrop-blur-sm transition-all duration-300 ${
                 active
-                  ? `${t.glow} border-transparent bg-slate-800/50`
-                  : "border-accent-blue/15 bg-slate-900/30 hover:border-accent-blue/30"
+                  ? `${t.glow} border-[#7DA7D9] bg-[#071834]`
+                  : "border-[#446391]/30 bg-[#071834]/80 hover:border-[#6484B5]"
               }`}
             >
               <p
-                className={`font-display text-lg font-light tracking-widest ${active ? t.text : "text-slate-400"}`}
+                className={`font-display text-lg font-normal tracking-wider ${active ? "text-white" : "text-slate-400"}`}
               >
                 {t.name.split(" · ")[0]}
               </p>
-              <p className="mt-1 font-sans text-[10px] font-light uppercase tracking-widest text-slate-500">
+              <p className="mt-1 font-mono text-[10px] font-normal uppercase tracking-widest text-[#7DA7D9]/80">
                 {t.range}
               </p>
             </div>
@@ -160,16 +160,16 @@ export default function TierExplorer() {
         })}
       </div>
 
-      <div className="mt-4 flex items-center gap-2 rounded-lg border border-accent-blue/15 bg-slate-900/40 px-4 py-3 font-sans text-xs font-light tracking-wider text-slate-400">
+      <div className="mt-4 flex items-center gap-2 rounded-lg border border-[#446391]/30 bg-[#071834]/80 px-4 py-3 font-mono text-xs font-normal tracking-wider text-slate-300">
         <span
           className="h-2.5 w-2.5 rounded-full"
           style={{ backgroundColor: tier.stroke, boxShadow: `0 0 10px ${tier.stroke}` }}
         />
         Selected tier:{" "}
-        <span className={`font-medium tracking-widest uppercase ${tier.text}`}>
+        <span className="font-normal tracking-widest uppercase text-[#7DA7D9]">
           {tier.name}
         </span>
-        <span className="ml-auto hidden text-slate-500 sm:inline">
+        <span className="ml-auto hidden text-slate-400 sm:inline">
           {tier.range}
         </span>
       </div>
@@ -189,10 +189,10 @@ export default function TierExplorer() {
                 key={perk}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex items-start gap-3 rounded-lg border border-accent-blue/10 bg-slate-900/30 px-4 py-3"
+                className="flex items-start gap-3 rounded-lg border border-[#446391]/25 bg-[#071834]/70 px-4 py-3"
               >
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent-cyan" />
-                <span className="font-sans text-sm font-light tracking-wider text-slate-200/90">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#7DA7D9]" />
+                <span className="font-mono text-xs font-normal tracking-wide text-slate-200">
                   {perk}
                 </span>
               </motion.li>
@@ -201,21 +201,21 @@ export default function TierExplorer() {
         </AnimatePresence>
       </div>
 
-      <div className="mt-8 rounded-lg border border-accent-blue/15 bg-space/30 px-4 py-4">
+      <div className="mt-8 rounded-lg border border-[#446391]/30 bg-[#071834]/80 px-4 py-4">
         <div className="mb-2 flex items-center gap-2">
-          <Gem className="h-4 w-4 text-gold" />
-          <p className="font-sans text-xs font-medium uppercase tracking-widest text-gold">
+          <Gem className="h-4 w-4 text-[#7DA7D9]" />
+          <p className="font-mono text-xs font-normal uppercase tracking-widest text-[#7DA7D9]">
             In-Kind Partnerships
           </p>
         </div>
-        <p className="font-sans text-xs font-light leading-relaxed tracking-wider text-slate-400">
+        <p className="font-mono text-xs font-normal leading-relaxed tracking-wider text-slate-300">
           Round-trip airfare (2) · 1-week Karachi hotel accommodation (2 people)
           · merchandise manufacturing · printing services · social reach
           support
         </p>
       </div>
 
-      <p className="mt-6 text-center font-sans text-[11px] font-light tracking-wider text-slate-500">
+      <p className="mt-6 text-center font-mono text-[11px] font-normal tracking-wider text-slate-400">
         Ranges are indicative — custom collaboration packages are always open.
       </p>
     </div>

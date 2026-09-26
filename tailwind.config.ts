@@ -8,23 +8,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          white: "#FFFFFF",
+          "blue-light": "#7DA7D9",
+          "blue-mid": "#6484B5",
+          "blue-deep": "#446391",
+          "navy-bg": "#071834",
+        },
+        // Direct utility aliases matching brand tokens
+        "navy-bg": "#071834",
+        "blue-light": "#7DA7D9",
+        "blue-mid": "#6484B5",
+        "blue-deep": "#446391",
         space: {
-          DEFAULT: "#0B132B",
-          deep: "#030712",
+          DEFAULT: "#071834",
+          deep: "#071834",
         },
         accent: {
-          cyan: "#00F0FF",
-          blue: "#3B82F6",
+          cyan: "#7DA7D9",
+          blue: "#6484B5",
+          deep: "#446391",
         },
-        platinum: "#E2E8F0",
-        gold: "#F59E0B",
+        platinum: "#FFFFFF",
       },
       fontFamily: {
-        display: ["var(--font-display)", "Georgia", "serif"],
-        sans: ["var(--font-sans)", "Inter", "sans-serif"],
+        display: ["Batangas", "var(--font-display)", "Bodoni Moda", "Cormorant Garamond", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "Lekton", "monospace"],
+        sans: ["var(--font-mono)", "Lekton", "monospace"],
       },
       letterSpacing: {
-        widest2: "0.35em",
+        widest2: "0.28em",
+        widest3: "0.35em",
       },
       animation: {
         "float-slow": "floatY 6s ease-in-out infinite",

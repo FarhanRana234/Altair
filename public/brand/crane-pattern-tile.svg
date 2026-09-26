@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240" fill="none">
+  <!-- Seamless Origami Crane Pattern Tile -->
+  <defs>
+    <g id="crane-line">
+      <!-- Faceted Origami Crane linework -->
+      <polygon points="50,20 80,10 84,15 76,28 64,35" stroke="#7DA7D9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <polygon points="44,34 68,20 68,26 58,52 51,38" stroke="#7DA7D9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <polygon points="16,50 22,41 30,51 27,62 22,60" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <polygon points="21,42 29,61 39,50 50,27" stroke="#7DA7D9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <polygon points="34,65 48,34 55,54" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <polygon points="37,55 51,52 59,74 46,65" stroke="#7DA7D9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <polygon points="59,53 64,67 70,87 64,90 59,74" stroke="#6484B5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <line x1="25" y1="44" x2="36" y2="61" stroke="#FFFFFF" stroke-width="1"/>
+      <line x1="48" y1="34" x2="55" y2="64" stroke="#7DA7D9" stroke-width="1"/>
+    </g>
+  </defs>
+
+  <!-- Crane 1 (Top Left) -->
+  <use href="#crane-line" transform="translate(10, 15) scale(0.9) rotate(-8)" opacity="0.3"/>
+  
+  <!-- Crane 2 (Center Right) -->
+  <use href="#crane-line" transform="translate(130, 30) scale(1) rotate(15)" opacity="0.25"/>
+
+  <!-- Crane 3 (Bottom Left) -->
+  <use href="#crane-line" transform="translate(30, 130) scale(0.85) rotate(22)" opacity="0.25"/>
+
+  <!-- Crane 4 (Bottom Right) -->
+  <use href="#crane-line" transform="translate(140, 140) scale(0.95) rotate(-12)" opacity="0.3"/>
+
+  <!-- Repeat boundary overlaps for seamless tiling -->
+  <use href="#crane-line" transform="translate(250, 15) scale(0.9) rotate(-8)" opacity="0.3"/>
+  <use href="#crane-line" transform="translate(10, 255) scale(0.9) rotate(-8)" opacity="0.3"/>
+  <use href="#crane-line" transform="translate(250, 255) scale(0.9) rotate(-8)" opacity="0.3"/>
+</svg>

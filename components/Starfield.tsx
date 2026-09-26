@@ -14,13 +14,13 @@ type Star = {
 };
 
 const COLORS = [
-  "rgba(255, 255, 255, 0.8)",
-  "rgba(0, 240, 255, 0.4)",
-  "rgba(59, 130, 246, 0.2)",
+  "rgba(255, 255, 255, 0.85)",
+  "rgba(125, 167, 217, 0.5)",
+  "rgba(100, 132, 181, 0.3)",
 ];
 
 const CONNECT_DISTANCE = 100;
-const LINE_COLOR = "rgba(59, 130, 246, 0.16)";
+const LINE_COLOR = "rgba(125, 167, 217, 0.15)";
 
 function buildStars(count: number, width: number, height: number): Star[] {
   return Array.from({ length: count }, () => ({

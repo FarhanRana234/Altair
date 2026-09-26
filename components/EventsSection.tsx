@@ -1,87 +1,104 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Flag, Mic } from "lucide-react";
-
-const EVENTS = [
-  {
-    icon: Flag,
-    title: "Karachi Community Race Event",
-    body: "A public race in Karachi expecting an audience across various age ranges, creating sponsor visibility and an engaging community gathering.",
-    tag: "On Ground",
-  },
-  {
-    icon: Mic,
-    title: "Engineering Podcasts",
-    body: "Industry interviews with aerospace professionals and pilots targeting STEM learners while showcasing sponsor marketing materials.",
-    tag: "Digital",
-  },
-];
+import { Flag, Mic, Instagram } from "lucide-react";
 
 export default function EventsSection() {
   return (
     <section
       id="events"
-      className="relative z-10 mx-auto w-full max-w-7xl px-6 py-32"
+      className="relative z-10 mx-auto w-full max-w-6xl px-6 py-28 sm:py-36 overflow-hidden rounded-3xl my-10"
     >
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: 0.9, ease: "easeOut" }}
-        className="mb-14 flex flex-col items-center text-center"
-      >
-        <p className="eyebrow mb-6">05 — Beyond the Track</p>
-        <h2 className="section-heading">EVENTS</h2>
-        <p className="section-body mt-4 max-w-2xl">
-          We are planning to do two social events to maximize our reach and
-          provide a wider range of values to our sponsors.
-        </p>
-      </motion.div>
+      {/* Decorative Crane Pattern Tile subtle background texture */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.07] bg-repeat"
+        style={{ backgroundImage: `url('/brand/crane-pattern-tile.svg')`, backgroundSize: "240px 240px" }}
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#071834] via-transparent to-[#071834]" />
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {EVENTS.map((event, i) => {
-          const Icon = event.icon;
-          return (
-            <motion.div
-              key={event.title}
-              initial={{ opacity: 0, y: 32 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.8, delay: i * 0.15, ease: "easeOut" }}
-              className="glass-card group relative overflow-hidden p-8 sm:p-10"
-            >
-              <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-accent-cyan/10 blur-3xl transition-opacity duration-500 group-hover:bg-accent-cyan/20" />
-              <div className="relative">
-                <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-accent-cyan/30 bg-accent-cyan/10">
-                  <Icon className="h-5 w-5 text-accent-cyan" />
-                </div>
-                <span className="mb-4 inline-block rounded-full border border-accent-blue/30 px-3 py-1 text-[10px] font-light uppercase tracking-widest2 text-slate-400">
-                  {event.tag}
-                </span>
-                <h3 className="mb-4 font-display text-3xl font-light tracking-wider text-platinum">
-                  {event.title}
-                </h3>
-                <p className="section-body">{event.body}</p>
-              </div>
-            </motion.div>
-          );
-        })}
+      <div className="relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.35 }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+          className="mb-14 flex flex-col items-center text-center"
+        >
+          <p className="eyebrow mb-6">05 — Outreach</p>
+          <h2 className="section-heading mb-6">EVENTS</h2>
+          <p className="section-body max-w-3xl text-base sm:text-lg text-slate-200">
+            We are planning to do two social events to maximize our reach and
+            provide a wider range of values to our sponsors.
+          </p>
+        </motion.div>
+
+        {/* Two-column layout matching Mockup Page 6 */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Event 1: Karachi Run */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+            className="glass-card group relative p-8 sm:p-10 border border-[#446391]/35 bg-[#071834]/85 hover:border-[#7DA7D9]/50 transition-colors"
+          >
+            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[#7DA7D9]/30 bg-[#7DA7D9]/10">
+              <Flag className="h-5 w-5 text-[#7DA7D9]" />
+            </div>
+            <span className="mb-4 inline-block font-mono text-[10px] font-normal uppercase tracking-widest text-[#7DA7D9] bg-[#071834] px-3 py-1 rounded-full border border-[#446391]/30">
+              On Ground · Karachi
+            </span>
+            <p className="section-body text-slate-200 leading-relaxed text-sm sm:text-base">
+              We will hold a run in Karachi, expecting audience from various age
+              ranges. Moreover, based on our previous such experience we will be
+              able to provide visibility to our collaborating partners and create
+              a fun, memorable gathering for the participants.
+            </p>
+          </motion.div>
+
+          {/* Event 2: Engineering Podcasts */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="glass-card group relative p-8 sm:p-10 border border-[#446391]/35 bg-[#071834]/85 hover:border-[#7DA7D9]/50 transition-colors"
+          >
+            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[#7DA7D9]/30 bg-[#7DA7D9]/10">
+              <Mic className="h-5 w-5 text-[#7DA7D9]" />
+            </div>
+            <span className="mb-4 inline-block font-mono text-[10px] font-normal uppercase tracking-widest text-[#7DA7D9] bg-[#071834] px-3 py-1 rounded-full border border-[#446391]/30">
+              Digital Broadcast · STEM
+            </span>
+            <p className="section-body text-slate-200 leading-relaxed text-sm sm:text-base">
+              We are also planning to hold various podcasts with the industry
+              people related to our field. They will help us narrow down our
+              audience to enthusiast STEM learners. Furthermore, we will display
+              our sponsors&apos; marketing materials as well as honoring the
+              venue sponsor.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Footer callout matching Mockup Page 6 */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="mt-12 text-center"
+        >
+          <a
+            href="https://www.instagram.com/teamaltair__"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 rounded-full border border-[#446391]/40 bg-[#071834]/80 px-8 py-3.5 font-mono text-xs font-normal tracking-[0.2em] text-slate-200 hover:border-[#7DA7D9] hover:text-[#7DA7D9] transition-all shadow-lg"
+          >
+            <Instagram className="h-4 w-4 text-[#7DA7D9]" />
+            Follow us on instagram for further updates!
+          </a>
+        </motion.div>
       </div>
-
-      <motion.a
-        href="https://www.instagram.com/teamaltair__"
-        target="_blank"
-        rel="noopener noreferrer"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.3 }}
-        className="mt-10 flex items-center justify-center gap-3 rounded-2xl border border-accent-blue/25 bg-slate-900/40 px-6 py-4 font-sans text-sm font-light tracking-widest text-slate-200/90 backdrop-blur-md transition-colors hover:border-accent-cyan/40 hover:text-accent-cyan"
-      >
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-cyan" />
-        Follow us on instagram for further updates!
-      </motion.a>
     </section>
   );
 }

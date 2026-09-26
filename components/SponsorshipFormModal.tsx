@@ -96,7 +96,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
   ) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
   const fieldClass =
-    "w-full rounded-xl border border-accent-blue/20 bg-space-deep/70 px-4 py-3 font-sans text-sm font-light tracking-wider text-platinum placeholder:text-slate-500 focus:border-accent-cyan/60";
+    "w-full rounded-xl border border-[#446391]/35 bg-[#071834] px-4 py-3 font-mono text-sm font-normal tracking-wider text-white placeholder:text-slate-500 focus:border-[#7DA7D9] transition-colors";
 
   return (
     <AnimatePresence>
@@ -105,7 +105,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-space-deep/80 p-4 backdrop-blur-md"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-[#071834]/85 p-4 backdrop-blur-md"
           onClick={resetAndClose}
         >
           <motion.div
@@ -114,19 +114,19 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
             exit={{ opacity: 0, scale: 0.96, y: 16 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()}
-            className="glass-card max-h-[90vh] w-full max-w-[90vw] overflow-y-auto border-accent-cyan/20 p-8 sm:max-w-lg"
+            className="glass-card max-h-[90vh] w-full max-w-[90vw] overflow-y-auto border-[#446391]/40 bg-[#071834]/95 p-8 sm:max-w-lg shadow-2xl"
           >
             <div className="mb-6 flex items-start justify-between">
               <div>
                 <p className="eyebrow mb-2">Become a Partner</p>
-                <h3 className="font-display text-3xl font-light tracking-wider text-platinum">
+                <h3 className="font-display text-3xl font-normal tracking-wider text-white">
                   SPONSOR US
                 </h3>
               </div>
               <button
                 onClick={resetAndClose}
                 aria-label="Close"
-                className="rounded-full border border-accent-blue/20 p-2 text-slate-400 transition-colors hover:border-accent-cyan/50 hover:text-accent-cyan"
+                className="rounded-full border border-[#446391]/35 p-2 text-slate-400 transition-colors hover:border-[#7DA7D9] hover:text-[#7DA7D9]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -138,21 +138,21 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center gap-4 py-8 text-center"
               >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-accent-cyan/40 bg-accent-cyan/10">
-                  <FileDown className="h-7 w-7 text-accent-cyan" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[#7DA7D9]/40 bg-[#7DA7D9]/15">
+                  <FileDown className="h-7 w-7 text-[#7DA7D9]" />
                 </div>
-                <p className="font-display text-2xl font-light text-platinum">
+                <p className="font-display text-2xl font-normal text-white">
                   Proposal on its way
                 </p>
                 <p className="section-body max-w-sm">
                   Thank you, {form.name.split(" ")[0]}. Your proposal has been
                   downloaded and our team at{" "}
-                  <span className="text-accent-cyan">altair.aeropak@gmail.com</span>{" "}
+                  <span className="text-[#7DA7D9]">altair.aeropak@gmail.com</span>{" "}
                   will reach out shortly.
                 </p>
                 <button
                   onClick={resetAndClose}
-                  className="mt-2 rounded-full border border-accent-cyan/40 bg-accent-cyan/10 px-6 py-2.5 text-xs font-medium uppercase tracking-widest text-accent-cyan transition-all hover:bg-accent-cyan hover:text-space-deep"
+                  className="mt-2 rounded-full border border-[#7DA7D9]/40 bg-[#7DA7D9]/15 px-6 py-2.5 font-mono text-xs font-normal uppercase tracking-widest text-[#7DA7D9] transition-all hover:bg-[#7DA7D9] hover:text-[#071834]"
                 >
                   Close
                 </button>
@@ -161,7 +161,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block">
-                    <span className="mb-1.5 block font-sans text-[11px] font-light uppercase tracking-widest text-slate-400">
+                    <span className="mb-1.5 block font-mono text-[11px] font-normal uppercase tracking-widest text-slate-400">
                       Full Name
                     </span>
                     <input
@@ -174,7 +174,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
                     />
                   </label>
                   <label className="block">
-                    <span className="mb-1.5 block font-sans text-[11px] font-light uppercase tracking-widest text-slate-400">
+                    <span className="mb-1.5 block font-mono text-[11px] font-normal uppercase tracking-widest text-slate-400">
                       Corporate Email
                     </span>
                     <input
@@ -189,7 +189,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
                 </div>
 
                 <label className="block">
-                  <span className="mb-1.5 block font-sans text-[11px] font-light uppercase tracking-widest text-slate-400">
+                  <span className="mb-1.5 block font-mono text-[11px] font-normal uppercase tracking-widest text-slate-400">
                     Company / Organization
                   </span>
                   <input
@@ -203,15 +203,15 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
                 </label>
 
                 <label className="block">
-                  <span className="mb-1.5 block font-sans text-[11px] font-light uppercase tracking-widest text-slate-400">
+                  <span className="mb-1.5 block font-mono text-[11px] font-normal uppercase tracking-widest text-slate-400">
                     Selected Sponsorship Tier
                   </span>
                   <select required value={form.tier} onChange={set("tier")} className={fieldClass}>
-                    <option value="" disabled className="bg-space-deep">
+                    <option value="" disabled className="bg-[#071834]">
                       Select a tier
                     </option>
                     {TIER_OPTIONS.map((tier) => (
-                      <option key={tier} value={tier} className="bg-space-deep">
+                      <option key={tier} value={tier} className="bg-[#071834]">
                         {tier}
                       </option>
                     ))}
@@ -219,7 +219,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
                 </label>
 
                 <label className="block">
-                  <span className="mb-1.5 block font-sans text-[11px] font-light uppercase tracking-widest text-slate-400">
+                  <span className="mb-1.5 block font-mono text-[11px] font-normal uppercase tracking-widest text-slate-400">
                     Note
                   </span>
                   <textarea
@@ -232,7 +232,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
                 </label>
 
                 {status === "error" ? (
-                  <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs font-light tracking-wider text-red-300">
+                  <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 font-mono text-xs font-normal tracking-wider text-red-300">
                     Something went wrong sending the form. Please try again or
                     email us directly at altair.aeropak@gmail.com.
                   </p>
@@ -241,7 +241,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
                 <button
                   type="submit"
                   disabled={status === "sending"}
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-accent-cyan/40 bg-accent-cyan/10 px-6 py-3.5 font-sans text-sm font-medium uppercase tracking-widest text-accent-cyan transition-all hover:bg-accent-cyan hover:text-space-deep hover:shadow-[0_0_28px_rgba(0,240,255,0.45)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-full border border-[#7DA7D9]/50 bg-[#7DA7D9]/15 px-6 py-3.5 font-mono text-xs font-normal uppercase tracking-widest text-[#7DA7D9] transition-all hover:bg-[#7DA7D9] hover:text-[#071834] hover:shadow-[0_0_24px_rgba(125,167,217,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {status === "sending" ? (
                     <>

@@ -6,9 +6,9 @@ import HeroCanvas from "./HeroCanvas";
 import Navbar from "./Navbar";
 import Hero from "./Hero";
 import AeroPakistanIntro from "./AeroPakistanIntro";
-import TrackRecord from "./TrackRecord";
+import TeamAltairSection from "./TeamAltairSection";
+import MeetTheTeamCarousel from "./MeetTheTeamCarousel";
 import ProjectShowcase from "./ProjectShowcase";
-import Team from "./Team";
 import EventsSection from "./EventsSection";
 import Sponsorship from "./Sponsorship";
 import Footer from "./Footer";
@@ -26,9 +26,9 @@ export default function Site() {
       <main className="relative z-10">
         <Hero />
         <AeroPakistanIntro />
-        <TrackRecord />
+        <TeamAltairSection />
+        <MeetTheTeamCarousel />
         <ProjectShowcase />
-        <Team />
         <EventsSection />
         <Sponsorship onSponsorClick={openSponsorship} />
       </main>

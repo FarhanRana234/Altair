@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" fill="none">
+  <!-- ALTAIR Origami Crane Logo (Transparent Background) -->
+  <g id="origami-crane" stroke="#1E3A60" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+    
+    <!-- Rear Wing (Furthest back - Pure White) -->
+    <polygon points="254,82 408,36 428,60 380,146 312,230" fill="#FFFFFF" />
+
+    <!-- Fore Wing (White facet) -->
+    <polygon points="254,82 342,108 312,230 244,155" fill="#FFFFFF" />
+    <polygon points="342,108 408,36 380,146 312,230" fill="#FFFFFF" />
+
+    <!-- Dark Blue 'T' Fold / Band across upper wing & down into body (#3A5E8C) -->
+    <polygon points="254,82 342,108 334,124 266,98" fill="#3A5E8C" />
+    <polygon points="342,108 334,124 298,248 312,230" fill="#3A5E8C" />
+
+    <!-- Head / Beak Outer Fold (White triangle at far left) -->
+    <polygon points="68,236 98,190 128,290" fill="#FFFFFF" />
+
+    <!-- Head Top Facet (Mid Blue #5D84B7) -->
+    <polygon points="98,190 186,190 128,290" fill="#5D84B7" />
+    
+    <!-- Head Eye Diamond (White cutout inside Head facet) -->
+    <polygon points="120,208 128,216 120,224 112,216" fill="#FFFFFF" stroke="#1E3A60" stroke-width="1.5" />
+
+    <!-- Throat / Breast Triangle (White fold) -->
+    <polygon points="128,290 156,228 186,260" fill="#FFFFFF" />
+
+    <!-- Central 'A' Apex & Left Leg (#5D84B7) -->
+    <polygon points="244,155 186,190 150,305 184,310 216,236" fill="#5D84B7" />
+
+    <!-- Central 'A' Inner Void (White Triangle) -->
+    <polygon points="236,176 186,275 284,248" fill="#FFFFFF" />
+
+    <!-- Central 'A' Right Leg & Crossbar (#5D84B7) -->
+    <polygon points="244,155 216,236 284,248 298,252 298,220" fill="#5D84B7" />
+    <polygon points="168,295 298,252 298,272 178,310" fill="#5D84B7" />
+
+    <!-- Lower Belly Facet (Large White Triangle) -->
+    <polygon points="128,290 178,310 270,395" fill="#FFFFFF" />
+
+    <!-- Lower Body / Mid-Section Fold (#5D84B7) -->
+    <polygon points="178,310 270,395 298,272" fill="#5D84B7" />
+
+    <!-- Lower Tail Dark Blue Inner Strip (#3A5E8C) -->
+    <polygon points="298,252 308,420 294,370 298,272" fill="#3A5E8C" />
+
+    <!-- Lower Tail Main Blade (#5D84B7) -->
+    <polygon points="298,252 308,420 326,380 322,290" fill="#5D84B7" />
+
+    <!-- Lower Tail Light Blue / White Facet (#7DA7D9 & #FFFFFF) -->
+    <polygon points="322,290 326,380 354,435 348,340" fill="#7DA7D9" />
+    <polygon points="326,380 354,435 382,462 342,425" fill="#FFFFFF" />
+    
+    <!-- Tail Diamond Cutout (#FFFFFF) -->
+    <polygon points="338,362 346,370 338,378 330,370" fill="#FFFFFF" stroke="#1E3A60" stroke-width="1.5" />
+
+    <!-- Bottom Tail White Tip -->
+    <polygon points="354,435 382,462 368,430" fill="#FFFFFF" />
+  </g>
+</svg>

@@ -15,19 +15,19 @@ export default function Sponsorship({ onSponsorClick }: { onSponsorClick: () => 
   return (
     <section
       id="sponsors"
-      className="relative z-10 mx-auto w-full max-w-7xl px-6 py-32"
+      className="relative z-10 mx-auto w-full max-w-7xl px-6 py-28 sm:py-36"
     >
-      <div className="grid gap-14 lg:grid-cols-2 lg:gap-20">
+      <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
+          viewport={{ once: true, amount: 0.35 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="lg:sticky lg:top-28 lg:self-start"
         >
           <p className="eyebrow mb-6">06 — Partnership</p>
-          <h2 className="section-heading text-left">SPONSOR US!</h2>
-          <p className="section-body mt-8">
+          <h2 className="section-heading text-left mb-6">SPONSOR US!</h2>
+          <p className="section-body text-base sm:text-lg leading-relaxed text-slate-200">
             ALTAIR presents an opportunity to collaborate and support the young
             talent in Engineering and Aerospace. Following is the Sponsorship
             Proposal. If you want to collaborate, do let us know and
@@ -37,7 +37,7 @@ export default function Sponsorship({ onSponsorClick }: { onSponsorClick: () => 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <button
               onClick={onSponsorClick}
-              className="flex items-center justify-center gap-2 rounded-full border border-accent-cyan/40 bg-accent-cyan/10 px-6 py-3.5 font-sans text-sm font-medium uppercase tracking-widest text-accent-cyan transition-all hover:bg-accent-cyan hover:text-space-deep hover:shadow-[0_0_28px_rgba(0,240,255,0.45)]"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-[#7DA7D9]/50 bg-[#7DA7D9]/15 px-6 py-3.5 font-mono text-xs font-normal uppercase tracking-widest text-[#7DA7D9] transition-all hover:bg-[#7DA7D9] hover:text-[#071834] hover:shadow-[0_0_24px_rgba(125,167,217,0.4)]"
             >
               <Handshake className="h-4 w-4" />
               Sponsor Us
@@ -45,25 +45,25 @@ export default function Sponsorship({ onSponsorClick }: { onSponsorClick: () => 
             <a
               href="/ALTAIR_SPONSORSHIP_PROPOSAL.pdf"
               download
-              className="flex items-center justify-center gap-2 rounded-full border border-accent-blue/30 bg-accent-blue/10 px-6 py-3.5 font-sans text-sm font-light uppercase tracking-widest text-slate-200 transition-all hover:border-accent-cyan/50 hover:text-accent-cyan"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-[#446391]/40 bg-[#071834]/80 px-6 py-3.5 font-mono text-xs font-normal uppercase tracking-widest text-slate-200 transition-all hover:border-[#7DA7D9] hover:text-white"
             >
               <FileDown className="h-4 w-4" />
               Download Proposal
             </a>
           </div>
 
-          <div className="mt-10">
+          <div className="mt-12">
             <p className="eyebrow mb-4">Aligned with UN SDGs</p>
             <div className="grid grid-cols-2 gap-3">
               {SDGS.map((sdg) => (
                 <div
                   key={sdg.number}
-                  className="flex items-center gap-3 rounded-xl border border-accent-blue/15 bg-slate-900/40 px-4 py-3 backdrop-blur-sm"
+                  className="flex items-center gap-3 rounded-xl border border-[#446391]/30 bg-[#071834]/80 px-4 py-3 backdrop-blur-sm"
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gold/40 bg-gold/10 font-display text-lg font-medium text-gold">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#7DA7D9]/40 bg-[#7DA7D9]/15 font-display text-base font-normal text-[#7DA7D9]">
                     {sdg.number}
                   </span>
-                  <span className="font-sans text-[11px] font-light tracking-wider text-slate-300/90">
+                  <span className="font-mono text-[11px] font-normal tracking-wider text-slate-300">
                     {sdg.label}
                   </span>
                 </div>
@@ -73,10 +73,10 @@ export default function Sponsorship({ onSponsorClick }: { onSponsorClick: () => 
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 36 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
         >
           <TierExplorer />
         </motion.div>

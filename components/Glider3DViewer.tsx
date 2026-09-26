@@ -22,21 +22,21 @@ function renderMaterial(): THREE.MeshStandardMaterial {
     color: "#dbe4f2",
     metalness: 0.85,
     roughness: 0.25,
-    emissive: "#0a3a5c",
-    emissiveIntensity: 0.25,
+    emissive: "#446391",
+    emissiveIntensity: 0.2,
   });
 }
 
 function cadMaterial(): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({
-    color: "#aee6ff",
+    color: "#7DA7D9",
     metalness: 0.15,
     roughness: 0.4,
-    emissive: "#00f0ff",
+    emissive: "#7DA7D9",
     emissiveIntensity: 0.55,
     wireframe: true,
     transparent: true,
-    opacity: 0.55,
+    opacity: 0.65,
   });
 }
 
@@ -78,8 +78,8 @@ export default function Glider3DViewer() {
       >
         <ambientLight intensity={1.5} />
         <directionalLight position={[10, 10, 10]} intensity={1.2} />
-        <directionalLight position={[-5, -3, 3]} intensity={0.35} color="#3b82f6" />
-        <pointLight position={[3, 2, 4]} intensity={25} color="#00f0ff" />
+        <directionalLight position={[-5, -3, 3]} intensity={0.35} color="#446391" />
+        <pointLight position={[3, 2, 4]} intensity={25} color="#7DA7D9" />
         <Suspense fallback={null}>
           <ModelErrorBoundary
             fallback={<GLTFModel url={FALLBACK_GLIDER_URL} mode={mode} />}
@@ -96,13 +96,13 @@ export default function Glider3DViewer() {
         />
       </Canvas>
 
-      <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full border border-accent-blue/25 bg-space-deep/70 p-1.5 backdrop-blur-md">
+      <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full border border-[#446391]/35 bg-[#071834]/85 p-1.5 backdrop-blur-md">
         <button
           onClick={() => setMode("render")}
           aria-label="Rendered view"
-          className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 font-sans text-[10px] font-medium uppercase tracking-widest transition-all ${
+          className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 font-mono text-[10px] font-normal uppercase tracking-widest transition-all ${
             mode === "render"
-              ? "bg-accent-cyan/20 text-accent-cyan shadow-[0_0_16px_rgba(0,240,255,0.35)]"
+              ? "bg-[#7DA7D9]/20 text-[#7DA7D9] shadow-[0_0_16px_rgba(125,167,217,0.35)]"
               : "text-slate-400 hover:text-slate-200"
           }`}
         >
@@ -111,9 +111,9 @@ export default function Glider3DViewer() {
         <button
           onClick={() => setMode("cad")}
           aria-label="CAD wireframe view"
-          className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 font-sans text-[10px] font-medium uppercase tracking-widest transition-all ${
+          className={`flex items-center gap-2 rounded-full px-3.5 py-1.5 font-mono text-[10px] font-normal uppercase tracking-widest transition-all ${
             mode === "cad"
-              ? "bg-accent-cyan/20 text-accent-cyan shadow-[0_0_16px_rgba(0,240,255,0.35)]"
+              ? "bg-[#7DA7D9]/20 text-[#7DA7D9] shadow-[0_0_16px_rgba(125,167,217,0.35)]"
               : "text-slate-400 hover:text-slate-200"
           }`}
         >

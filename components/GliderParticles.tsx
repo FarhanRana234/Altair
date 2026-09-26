@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, Preload } from "@react-three/drei";
@@ -16,10 +16,30 @@ export type GliderTarget = {
   x: number;
   y: number;
   scale: number;
-  rotX: number;
-  rotY: number;
-  rotZ: number;
+  rotX?: number;
+  rotY?: number;
+  rotZ?: number;
 };
+
+/**
+ * Computes shortest angular distance from a0 to a1 in degrees.
+ * Handles wrap-around so 170° -> -170° sweeps 20° through 180° instead of 340° through 0°.
+ */
+export function shortAngleDist(a0: number, a1: number): number {
+  const max = 360;
+  const da = (a1 - a0) % max;
+  return ((2 * da) % max) - da;
+}
+
+/**
+ * Normalizes any angle in degrees into [-180, 180].
+ * Prevents unbounded growth over long scroll sessions.
+ */
+export function normalizeAngle(a: number): number {
+  let angle = (a + 180) % 360;
+  if (angle < 0) angle += 360;
+  return angle - 180;
+}
 
 useGLTF.preload(LOCAL_GLIDER_URL);
 
@@ -148,13 +168,15 @@ function sampleForGeometry(
 function makeColors(positions: Float32Array): Float32Array {
   const colors = new Float32Array(positions.length);
   const white = new THREE.Color("#ffffff");
-  const cyan = new THREE.Color("#00f0ff");
-  const indigo = new THREE.Color("#3b82f6");
+  const lightBlue = new THREE.Color("#7DA7D9");
+  const midBlue = new THREE.Color("#6484B5");
+  const deepBlue = new THREE.Color("#446391");
   for (let i = 0; i < positions.length / 3; i += 1) {
     const y = positions[i * 3 + 1];
     const t = THREE.MathUtils.clamp((y + 0.25) / 0.75, 0, 1);
-    const color = white.clone().lerp(cyan, t);
-    if (Math.random() < 0.12) color.lerp(indigo, 0.85);
+    const color = white.clone().lerp(lightBlue, t);
+    if (Math.random() < 0.15) color.lerp(midBlue, 0.7);
+    if (Math.random() < 0.08) color.lerp(deepBlue, 0.85);
     colors[i * 3] = color.r;
     colors[i * 3 + 1] = color.g;
     colors[i * 3 + 2] = color.b;
@@ -164,7 +186,8 @@ function makeColors(positions: Float32Array): Float32Array {
 
 function GliderRig({ url, target, mode }: RigProps) {
   const { scene } = useGLTF(url);
-  const group = useRef<THREE.Group>(null);
+  const positionGroup = useRef<THREE.Group>(null);
+  const rotationGroup = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
   const solidsRef = useRef<THREE.Group>(null);
 
@@ -210,99 +233,204 @@ function GliderRig({ url, target, mode }: RigProps) {
 
   const dotTexture = useMemo(() => makeSoftDotTexture(), []);
 
-  const current = useRef<GliderTarget>({
-    x: -4,
-    y: 2.5,
-    scale: 1,
-    rotX: 0.35,
-    rotY: 0.55,
-    rotZ: 0.15,
+  useEffect(() => {
+    return () => {
+      dotTexture.dispose();
+      if (pointsGeometry) {
+        pointsGeometry.dispose();
+      }
+    };
+  }, [dotTexture, pointsGeometry]);
+
+  const currentPos = useRef<{ x: number; y: number; scale: number }>({
+    x: target.current.x,
+    y: target.current.y,
+    scale: target.current.scale,
   });
+  const prevDampedPos = useRef<{ x: number; y: number }>({
+    x: target.current.x,
+    y: target.current.y,
+  });
+
+  // Initial heading points along initial path vector towards the right-bottom (~27.7 deg)
+  const targetAngle = useRef<number>(27.7);
+  const currentAngle = useRef<number>(27.7);
+  const prevAngle = useRef<number>(27.7);
+  const bankAngle = useRef<number>(0);
   const currentPointerX = useRef(0);
 
   useFrame((state, delta) => {
+    const dt = Math.min(delta, 0.1);
     const t = state.clock.elapsedTime;
-    const k = Math.min(delta, 0.1);
-    const c = current.current;
+    const c = currentPos.current;
     const tgt = target.current;
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    const xFactor = isMobile ? 0.55 : 1;
-    const scaleFactor = isMobile ? 0.6 : 1;
-    const halfW = state.viewport.width / 2 - 0.3;
 
-    c.rotX = THREE.MathUtils.damp(c.rotX, tgt.rotX, 4, k);
-    c.rotY = THREE.MathUtils.damp(c.rotY, tgt.rotY, 4, k);
-    c.rotZ = THREE.MathUtils.damp(c.rotZ, tgt.rotZ, 4, k);
-    c.x = THREE.MathUtils.damp(c.x, tgt.x, 4, k);
-    c.y = THREE.MathUtils.damp(c.y, tgt.y, 4, k);
-    c.scale = THREE.MathUtils.damp(c.scale, tgt.scale, 4, k);
+    // Respect prefers-reduced-motion: show a static, correctly-oriented pose
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      if (positionGroup.current) {
+        positionGroup.current.position.set(tgt.x, tgt.y, 0);
+        positionGroup.current.scale.setScalar(tgt.scale);
+      }
+      if (rotationGroup.current) {
+        const rad = (27.7 * Math.PI) / 180;
+        const f = new THREE.Vector3(Math.cos(rad), -Math.sin(rad), 0).normalize();
+        const zWorld = f.clone().negate();
+        const desiredUp = new THREE.Vector3(0, 0.22, 0.97).normalize();
+        const r = new THREE.Vector3().crossVectors(desiredUp, zWorld).normalize();
+        const u = new THREE.Vector3().crossVectors(zWorld, r).normalize();
+        const m = new THREE.Matrix4().makeBasis(r, u, zWorld);
+        rotationGroup.current.quaternion.setFromRotationMatrix(m);
+      }
+      if (pointsRef.current) {
+        const mat = pointsRef.current.material as THREE.PointsMaterial;
+        mat.opacity = mode === "particles" ? 0.95 : 0;
+      }
+      if (solidsRef.current) {
+        solidsRef.current.children.forEach((child) => {
+          const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+          if (mat) mat.opacity = mode === "solid" ? 1 : 0.03;
+        });
+      }
+      return;
+    }
+
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+    // Smoothly and slowly damp position towards scroll target
+    c.x = THREE.MathUtils.damp(c.x, tgt.x, 3.5, dt);
+    c.y = THREE.MathUtils.damp(c.y, tgt.y, 3.5, dt);
+    c.scale = THREE.MathUtils.damp(c.scale, tgt.scale, 3.5, dt);
+
+    // Parallax pointer sway
     currentPointerX.current = THREE.MathUtils.damp(
       currentPointerX.current,
-      state.pointer.x * 0.35 * (isMobile ? 0.6 : 1),
+      state.pointer.x * 0.25 * (isMobile ? 0.4 : 1),
       3,
-      k
+      dt
     );
 
-    if (group.current) {
-      group.current.rotation.set(
-        c.rotX,
-        c.rotY + currentPointerX.current * 0.12 + Math.sin(t * 0.5) * 0.03,
-        c.rotZ
-      );
-      const float = Math.sin(t * 0.8) * 0.04;
-      const baseX = (c.x + currentPointerX.current) * xFactor;
-      const clampedX = THREE.MathUtils.clamp(baseX, -halfW, halfW);
-      group.current.position.set(clampedX, c.y + float, 0);
-      group.current.scale.setScalar(c.scale * scaleFactor);
+    // 1. Compute real per-frame movement vector in screen coordinates (down = positive Y)
+    const screenDx = c.x - prevDampedPos.current.x;
+    const screenDy = -(c.y - prevDampedPos.current.y);
+
+    prevDampedPos.current.x = c.x;
+    prevDampedPos.current.y = c.y;
+
+    const speed = Math.hypot(screenDx, screenDy);
+
+    // Base offset: 0 because nose lines up with angle 0 (towards right) in screen coordinates
+    const baseOffset = 0;
+
+    if (speed > 0.0003) {
+      const angleDeg = Math.atan2(screenDy, screenDx) * (180 / Math.PI) + baseOffset;
+      targetAngle.current = normalizeAngle(angleDeg);
+    }
+
+    // 3. Interpolate angles by shortest path smoothly
+    const turnResponse = speed > 0.008 ? 8 : 4.5;
+    const lerpFactor = Math.min(1, dt * turnResponse);
+    const nextAngle =
+      currentAngle.current + shortAngleDist(currentAngle.current, targetAngle.current) * lerpFactor;
+
+    // 4. Normalize every stored/output angle into [-180, 180] after each update
+    currentAngle.current = normalizeAngle(nextAngle);
+
+    // Subtle natural banking into turns
+    const da = shortAngleDist(prevAngle.current, currentAngle.current);
+    prevAngle.current = currentAngle.current;
+    const targetBank = THREE.MathUtils.clamp(-da * 0.07, -0.28, 0.28);
+    bankAngle.current = THREE.MathUtils.damp(bankAngle.current, targetBank, 5, dt);
+
+    // 5. Apply position on positionGroup and rotation on rotationGroup separately
+    if (positionGroup.current) {
+      const float = Math.sin(t * 0.8) * 0.035;
+      positionGroup.current.position.set(c.x + currentPointerX.current, c.y + float, 0);
+      positionGroup.current.scale.setScalar(c.scale);
+    }
+
+    if (rotationGroup.current) {
+      const rad = (currentAngle.current * Math.PI) / 180;
+      // Nose heading in Three.js world coordinates (Z = 0 plane)
+      const fx = Math.cos(rad);
+      const fy = -Math.sin(rad); // screen down is Three.js negative Y
+      const f = new THREE.Vector3(fx, fy, 0).normalize();
+
+      // In glider.glb, Nose is -Z, Tail is +Z, Right Wing is +X, Canopy is +Y.
+      // Therefore, to point the nose in direction f, the local +Z axis must point in -f:
+      const zWorld = f.clone().negate();
+
+      // Desired up vector: tilted slightly towards camera (+Z) and world up (+Y)
+      // This ensures the top canopy/wings are always gracefully visible from the camera
+      const desiredUp = new THREE.Vector3(0, 0.22, 0.97).normalize();
+
+      // Right wing vector (local +X)
+      const r = new THREE.Vector3().crossVectors(desiredUp, zWorld).normalize();
+
+      // Apply banking around the forward flight axis
+      if (Math.abs(bankAngle.current) > 0.001) {
+        r.applyAxisAngle(f, bankAngle.current);
+      }
+
+      // Orthogonal up vector (local +Y canopy axis)
+      const u = new THREE.Vector3().crossVectors(zWorld, r).normalize();
+
+      // Construct orthonormal basis: Column 0 = r (+X), Column 1 = u (+Y), Column 2 = zWorld (+Z)
+      const m = new THREE.Matrix4().makeBasis(r, u, zWorld);
+      rotationGroup.current.quaternion.setFromRotationMatrix(m);
     }
 
     if (pointsRef.current) {
-      pointsRef.current.rotation.y = t * 0.015;
       const mat = pointsRef.current.material as THREE.PointsMaterial;
-      mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "particles" ? 0.95 : 0, 6, k);
+      mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "particles" ? 0.95 : 0, 6, dt);
     }
 
     if (solidsRef.current) {
       solidsRef.current.children.forEach((child) => {
         const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
         if (mat) {
-          mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "solid" ? 1 : 0.03, 6, k);
+          mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "solid" ? 1 : 0.03, 6, dt);
         }
       });
     }
   });
 
   return (
-    <group ref={group}>
-      {pointsGeometry ? (
-        <points ref={pointsRef} geometry={pointsGeometry} frustumCulled={false}>
-          <pointsMaterial
-            map={dotTexture}
-            vertexColors
-            size={0.035}
-            sizeAttenuation
-            transparent
-            opacity={0.95}
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
-          />
-        </points>
-      ) : null}
-      <group position={normalization.position} rotation={normalization.rotation} scale={normalization.scale}>
-        <group ref={solidsRef}>
-          {geometries.map((geometry, i) => (
-            <mesh key={i} geometry={geometry}>
-              <meshStandardMaterial
-                color="#d7e0f0"
-                metalness={0.85}
-                roughness={0.25}
-                emissive="#1e3a8a"
-                emissiveIntensity={0.2}
-                transparent
-                opacity={0.03}
-              />
-            </mesh>
-          ))}
+    <group ref={positionGroup}>
+      <group ref={rotationGroup}>
+        {pointsGeometry ? (
+          <points ref={pointsRef} geometry={pointsGeometry} frustumCulled={false}>
+            <pointsMaterial
+              map={dotTexture}
+              vertexColors
+              size={0.026}
+              sizeAttenuation
+              transparent
+              opacity={0.95}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </points>
+        ) : null}
+        <group position={normalization.position} rotation={normalization.rotation} scale={normalization.scale}>
+          <group ref={solidsRef}>
+            {geometries.map((geometry, i) => (
+              <mesh key={i} geometry={geometry}>
+                <meshStandardMaterial
+                  color="#d7e0f0"
+                  metalness={0.85}
+                  roughness={0.25}
+                  emissive="#1e3a8a"
+                  emissiveIntensity={0.2}
+                  transparent
+                  opacity={0.03}
+                />
+              </mesh>
+            ))}
+          </group>
         </group>
       </group>
     </group>
