@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -43,8 +44,8 @@ export function getViewportBounds() {
   if (typeof window === "undefined") {
     return { halfW: 4.5, halfH: 2.7, isMobile: false, isLandscape: false };
   }
-  const fov = 42;
-  const cameraZ = 7;
+  const fov = 38;
+  const cameraZ = 10;
   const halfH = Math.tan((fov / 2) * (Math.PI / 180)) * cameraZ;
   const width = window.innerWidth;
   const height = window.innerHeight || 1;
@@ -128,65 +129,64 @@ export default function HeroCanvas() {
     }
 
     let tl: gsap.core.Timeline | null = null;
+    const progress = { value: 0 };
+    const curve = new THREE.CatmullRomCurve3([]);
+
+    const updateFlightPath = () => {
+      const bounds = getViewportBounds();
+      const points = FLIGHT_WAYPOINTS.map((waypoint) => {
+        const position = computeWaypointPos(waypoint, bounds);
+        return new THREE.Vector3(position.x, position.y, 0);
+      });
+      curve.points = points;
+
+      const t = THREE.MathUtils.clamp(progress.value, 0, 1);
+      const position = curve.getPointAt(t);
+      const tangent = curve.getTangentAt(t).normalize();
+      const tangentAngle = Math.atan2(-tangent.y, tangent.x);
+      const nextT = Math.min(1, t + 0.025);
+      const nextTangent = curve.getTangentAt(nextT).normalize();
+      const curvature = THREE.MathUtils.clamp(
+        (Math.atan2(-nextTangent.y, nextTangent.x) - tangentAngle) * 2.4,
+        -0.32,
+        0.32,
+      );
+      const scale = THREE.MathUtils.lerp(0.95, 0.82, t);
+
+      target.current.x = position.x;
+      target.current.y = position.y;
+      target.current.scale = scale * (bounds.isMobile ? 0.36 : 0.52);
+      target.current.rotX = THREE.MathUtils.lerp(0.16, -0.22, t);
+      target.current.rotY = THREE.MathUtils.clamp(curvature * 0.35, -0.14, 0.14);
+      target.current.rotZ = curvature;
+    };
 
     const buildTimeline = () => {
-      if (tl) {
-        tl.kill();
-        tl = null;
-      }
-
-      const bounds = getViewportBounds();
-      const p0 = computeWaypointPos(FLIGHT_WAYPOINTS[0], bounds);
-
-      if (window.scrollY === 0) {
-        target.current.x = p0.x;
-        target.current.y = p0.y;
-        target.current.scale = p0.scale;
-        target.current.rotX = p0.rotX;
-        target.current.rotY = p0.rotY;
-        target.current.rotZ = p0.rotZ;
-      }
-
+      tl?.kill();
+      updateFlightPath();
       tl = gsap.timeline({
         scrollTrigger: {
           trigger: document.documentElement,
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.5,
+          scrub: 1.1,
           invalidateOnRefresh: true,
         },
         defaults: { ease: "none" },
       });
-
-      for (let i = 1; i < FLIGHT_WAYPOINTS.length; i++) {
-        const p = computeWaypointPos(FLIGHT_WAYPOINTS[i], bounds);
-        tl.to(target.current, {
-          x: p.x,
-          y: p.y,
-          scale: p.scale,
-          rotX: FLIGHT_WAYPOINTS[i].rotX,
-          rotY: FLIGHT_WAYPOINTS[i].rotY,
-          rotZ: FLIGHT_WAYPOINTS[i].rotZ,
-          duration: FLIGHT_WAYPOINTS[i].duration,
-        });
-      }
-
+      tl.to(progress, { value: 1, duration: 1, onUpdate: updateFlightPath });
       ScrollTrigger.refresh();
     };
 
     buildTimeline();
-
-    const handleResize = () => {
-      buildTimeline();
-    };
-
+    const handleResize = () => buildTimeline();
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
-      if (tl) tl.kill();
+      tl?.kill();
       ScrollTrigger.getAll().forEach((st) => st.kill());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,7 +208,7 @@ export default function HeroCanvas() {
             failIfMajorPerformanceCaveat: false,
           }}
           dpr={[1, 1.5]}
-          camera={{ position: [0, 0, 7], fov: 42, near: 0.1, far: 50 }}
+          camera={{ position: [0, 0, 10], fov: 38, near: 0.01, far: 100 }}
           onCreated={({ gl }) => {
             const handleContextLost = (e: Event) => {
               // Crucial: preventDefault allows WebGL context restoration instead of permanent block
