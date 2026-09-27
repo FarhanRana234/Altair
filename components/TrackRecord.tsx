@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 
 type Metric = {
   value: string;
+  display?: string;
   suffix?: string;
   prefix?: string;
   decimals?: number;
@@ -16,25 +17,24 @@ const METRICS: Metric[] = [
   {
     value: "1",
     suffix: "st",
-    label: "1st Runners-Up",
-    sublabel: "Team name: DriftX",
+    label: "Runners Up",
+    sublabel: "Team: Driftx",
   },
   {
     value: "190",
     suffix: " / 200",
-    label: "Engineering & Design",
-    sublabel: "Competition score",
+    label: "Score",
+    sublabel: "Engineering & design score",
   },
   {
-    value: "3",
-    suffix: "rd",
+    value: "0",
+    display: "Top 3",
     label: "Race Performance",
-    sublabel: "Top 3 in race performance",
   },
   {
     value: "2",
-    label: "Community Events",
-    sublabel: "SportsFest with 15 teams · Beach clean-up with Alkhidmat",
+    label: "Organized Events",
+    sublabel: "SportsFest with 15 teams and multiple sports · Beach clean-up with AlKhidmat",
   },
 ];
 
@@ -44,6 +44,10 @@ function formatNumber(raw: string): number {
 
 function Counter({ metric }: { metric: Metric }) {
   const ref = useRef<HTMLSpanElement>(null);
+
+  if (metric.display) {
+    return <span ref={ref}>{metric.display}</span>;
+  }
   const inView = useInView(ref, { once: true, amount: 0.5 });
   const [text, setText] = useState(
     `${metric.prefix ?? ""}${metric.decimals ? "0.0" : "0"}`
@@ -97,7 +101,7 @@ export default function TrackRecord() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {METRICS.map((metric, i) => (
           <motion.div
             key={metric.label}
