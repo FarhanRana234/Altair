@@ -218,7 +218,7 @@ export default function HeroCanvas() {
 
   return (
     <div
-      className="altair-hero-canvas pointer-events-none fixed inset-0 -z-10 will-change-transform"
+      className="altair-hero-canvas pointer-events-none fixed inset-0 z-0 will-change-transform"
       style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh" }}
     >
       <CanvasErrorBoundary fallback={null}>
