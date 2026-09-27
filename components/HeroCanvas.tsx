@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -29,22 +30,22 @@ export type RelativeWaypoint = {
 // 3. Sweeps across to left bottom (Meet The Team / Project)
 // 4. Settles gently at centre bottom (Sponsorship / Footer) slowly
 export const FLIGHT_WAYPOINTS: RelativeWaypoint[] = [
-  // 1. Start at Left Top (Hero screen)
-  { xPct: -0.62, yPct: 0.76, scale: 1.0, rotX: 0.08, rotY: -0.08, rotZ: -0.12, duration: 0 },
+  // 1. Start above the hero copy, clear of the heading and CTA
+  { xPct: 0.14, yPct: 0.68, scale: 1.0, rotX: 0.08, rotY: -0.08, rotZ: -0.12, duration: 0 },
   // 2. Sweep right while banking into the first curve
   { xPct: 0.58, yPct: 0.14, scale: 0.96, rotX: -0.04, rotY: 0.12, rotZ: 0.2, duration: 0.36 },
   // 3. Cross left in an S-curve
   { xPct: -0.55, yPct: -0.46, scale: 0.92, rotX: 0.1, rotY: -0.16, rotZ: -0.24, duration: 0.36 },
-  // 4. Pitch down into the apply/footer area
-  { xPct: 0.0, yPct: -0.80, scale: 0.88, rotX: -0.28, rotY: 0.18, rotZ: 0.12, duration: 0.28 },
+  // 4. Pitch down toward the footer logo
+  { xPct: 0.56, yPct: -0.72, scale: 0.88, rotX: -0.28, rotY: 0.18, rotZ: -0.28, duration: 0.28 },
 ];
 
 export function getViewportBounds() {
   if (typeof window === "undefined") {
     return { halfW: 4.5, halfH: 2.7, isMobile: false, isLandscape: false };
   }
-  const fov = 42;
-  const cameraZ = 7;
+  const fov = 38;
+  const cameraZ = 10;
   const halfH = Math.tan((fov / 2) * (Math.PI / 180)) * cameraZ;
   const width = window.innerWidth;
   const height = window.innerHeight || 1;
@@ -127,67 +128,65 @@ export default function HeroCanvas() {
       return;
     }
 
-    let tl: gsap.core.Timeline | null = null;
+    let flightTrigger: ScrollTrigger | null = null;
+    const progress = { value: 0 };
+    const curve = new THREE.CatmullRomCurve3([]);
+
+    const updateFlightPath = () => {
+      const bounds = getViewportBounds();
+      const points = FLIGHT_WAYPOINTS.map((waypoint) => {
+        const position = computeWaypointPos(waypoint, bounds);
+        return new THREE.Vector3(position.x, position.y, 0);
+      });
+      curve.points = points;
+
+      const t = THREE.MathUtils.clamp(progress.value, 0, 1);
+      const position = curve.getPointAt(t);
+      const tangent = curve.getTangentAt(t).normalize();
+      // Three.js screen-space rotation maps local +X to the path tangent.
+      const tangentAngle = Math.atan2(tangent.y, tangent.x);
+      const scale = THREE.MathUtils.lerp(0.95, 0.82, t);
+
+      target.current.x = position.x;
+      target.current.y = position.y;
+      target.current.scale = scale * (bounds.isMobile ? 0.36 : 0.52);
+      // The particle mesh is authored nose-first along local +Z. Keep it
+      // face-on to the camera and yaw it in screen space along the flight path.
+      target.current.rotX = 0;
+      target.current.rotY = 0;
+      target.current.rotZ = tangentAngle;
+
+    };
 
     const buildTimeline = () => {
-      if (tl) {
-        tl.kill();
-        tl = null;
-      }
-
-      const bounds = getViewportBounds();
-      const p0 = computeWaypointPos(FLIGHT_WAYPOINTS[0], bounds);
-
-      if (window.scrollY === 0) {
-        target.current.x = p0.x;
-        target.current.y = p0.y;
-        target.current.scale = p0.scale;
-        target.current.rotX = p0.rotX;
-        target.current.rotY = p0.rotY;
-        target.current.rotZ = p0.rotZ;
-      }
-
-      tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: document.documentElement,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1.5,
-          invalidateOnRefresh: true,
+      flightTrigger?.kill();
+      updateFlightPath();
+      flightTrigger = ScrollTrigger.create({
+        trigger: document.documentElement,
+        start: "top top",
+        end: "bottom bottom",
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          // Read ScrollTrigger progress directly so reverse scrolling immediately
+          // moves the glider back up the path instead of leaving a scrub tween behind.
+          progress.value = self.progress;
+          updateFlightPath();
         },
-        defaults: { ease: "none" },
       });
-
-      for (let i = 1; i < FLIGHT_WAYPOINTS.length; i++) {
-        const p = computeWaypointPos(FLIGHT_WAYPOINTS[i], bounds);
-        tl.to(target.current, {
-          x: p.x,
-          y: p.y,
-          scale: p.scale,
-          rotX: FLIGHT_WAYPOINTS[i].rotX,
-          rotY: FLIGHT_WAYPOINTS[i].rotY,
-          rotZ: FLIGHT_WAYPOINTS[i].rotZ,
-          duration: FLIGHT_WAYPOINTS[i].duration,
-        });
-      }
-
+      progress.value = flightTrigger.progress;
+      updateFlightPath();
       ScrollTrigger.refresh();
     };
 
     buildTimeline();
-
-    const handleResize = () => {
-      buildTimeline();
-    };
-
+    const handleResize = () => buildTimeline();
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
-      if (tl) tl.kill();
-      ScrollTrigger.getAll().forEach((st) => st.kill());
+      flightTrigger?.kill();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -197,7 +196,10 @@ export default function HeroCanvas() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[6] will-change-transform">
+    <div
+      className="altair-hero-canvas pointer-events-none fixed inset-0 z-0 will-change-transform"
+      style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh" }}
+    >
       <CanvasErrorBoundary fallback={null}>
         <Canvas
           frameloop="always"
@@ -208,8 +210,13 @@ export default function HeroCanvas() {
             failIfMajorPerformanceCaveat: false,
           }}
           dpr={[1, 1.5]}
-          camera={{ position: [0, 0, 7], fov: 42, near: 0.1, far: 50 }}
+          camera={{ position: [0, 0, 10], fov: 38, near: 0.01, far: 100 }}
+          style={{ width: "100%", height: "100%", display: "block", pointerEvents: "auto" }}
           onCreated={({ gl }) => {
+            gl.domElement.style.width = "100vw";
+            gl.domElement.style.height = "100vh";
+            gl.domElement.style.display = "block";
+            gl.setSize(window.innerWidth, window.innerHeight, false);
             const handleContextLost = (e: Event) => {
               // Crucial: preventDefault allows WebGL context restoration instead of permanent block
               e.preventDefault();

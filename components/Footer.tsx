@@ -35,7 +35,7 @@ export default function Footer() {
   return (
     <footer
       id="contact"
-      className="relative z-10 border-t border-[#446391]/25 bg-[#071834] backdrop-blur-sm"
+      className="relative z-10 border-t border-[#446391]/25 bg-[#071834]/80 backdrop-blur-sm"
     >
       <div className="mx-auto w-full max-w-6xl px-6 py-28 sm:py-36">
         <motion.div
@@ -96,7 +96,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom Footer Bar with Tagline */}
-      <div className="border-t border-[#446391]/20 bg-[#071834]">
+      <div className="border-t border-[#446391]/20 bg-[#071834]/80">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row text-center sm:text-left">
           <div className="flex items-center gap-3">
             <Image
