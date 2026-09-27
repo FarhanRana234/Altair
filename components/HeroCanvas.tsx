@@ -143,11 +143,9 @@ export default function HeroCanvas() {
       const t = THREE.MathUtils.clamp(progress.value, 0, 1);
       const position = curve.getPointAt(t);
       const tangent = curve.getTangentAt(t).normalize();
-      // Three.js screen-space rotation maps local +X to the path tangent.
-      let tangentAngle = Math.atan2(tangent.y, tangent.x);
-      // Keep the aircraft upright while it pitches toward the lower sections.
-      if (tangentAngle > Math.PI / 2) tangentAngle -= Math.PI;
-      if (tangentAngle < -Math.PI / 2) tangentAngle += Math.PI;
+      // Use the continuous tangent directly. Flipping the angle by π when the
+      // path crosses vertical makes the nose suddenly reverse mid-flight.
+      const tangentAngle = Math.atan2(tangent.y, tangent.x);
       const scale = THREE.MathUtils.lerp(1.08, 0.94, t);
 
       target.current.x = position.x;

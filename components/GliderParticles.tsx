@@ -292,9 +292,9 @@ function GliderRig({ url, target, mode }: Props) {
       root.current.scale.setScalar(active.scale);
     }
     if (orientation.current) {
-      // The sampled model's nose is local +Y. Align that axis directly to the
-      // screen-space travel tangent, then bank around the nose so the wings
-      // keep a visible 3D angle without ever inverting the aircraft.
+      // The imported mesh nose is local -Y. The scroll controller supplies
+      // the continuous path angle, so this maps the nose to the tangent without
+      // any π flips when the path turns through the vertical.
       flightDirection.set(Math.cos(active.rotZ + Math.PI / 2), Math.sin(active.rotZ + Math.PI / 2), 0).normalize();
       headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
       // Keep the aircraft upright through the middle of the flight path;
