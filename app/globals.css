@@ -34,7 +34,7 @@ html {
 
 body {
   background:
-    linear-gradient(45deg, #355f9a 0%, #173b70 28%, #0b2855 58%, #061a3a 100%) fixed;
+    linear-gradient(45deg, #264a7c 0%, #112f5d 28%, #081f46 58%, #04132e 100%) fixed;
   background-color: var(--color-navy-bg);
   color: var(--color-white);
   overflow-x: hidden;
