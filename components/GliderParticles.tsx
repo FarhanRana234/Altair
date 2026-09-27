@@ -295,9 +295,9 @@ function GliderRig({ url, target, mode }: Props) {
       // keep a visible 3D angle without ever inverting the aircraft.
       flightDirection.set(Math.cos(active.rotZ + Math.PI / 2), Math.sin(active.rotZ + Math.PI / 2), 0).normalize();
       headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
-      // The source mesh is authored inverted around its forward axis; this
-      // half-turn puts the tail fin above the fuselage, with a slight bank.
-      bankQuaternion.current.setFromAxisAngle(forwardAxis, Math.PI + 0.24);
+      // Keep the aircraft upright while banking slightly so its nose follows
+      // the travel direction instead of presenting the tail.
+      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.24);
       targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
