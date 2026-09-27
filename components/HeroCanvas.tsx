@@ -30,8 +30,8 @@ export type RelativeWaypoint = {
 // 3. Sweeps across to left bottom (Meet The Team / Project)
 // 4. Settles gently at centre bottom (Sponsorship / Footer) slowly
 export const FLIGHT_WAYPOINTS: RelativeWaypoint[] = [
-  // 1. Start at Left Top (Hero screen)
-  { xPct: -0.62, yPct: 0.76, scale: 1.0, rotX: 0.08, rotY: -0.08, rotZ: -0.12, duration: 0 },
+  // 1. Start above the hero copy, clear of the heading and CTA
+  { xPct: 0.14, yPct: 0.68, scale: 1.0, rotX: 0.08, rotY: -0.08, rotZ: -0.12, duration: 0 },
   // 2. Sweep right while banking into the first curve
   { xPct: 0.58, yPct: 0.14, scale: 0.96, rotX: -0.04, rotY: 0.12, rotZ: 0.2, duration: 0.36 },
   // 3. Cross left in an S-curve

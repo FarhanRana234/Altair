@@ -340,7 +340,6 @@ function GliderRig({ url, target, mode }: RigProps) {
   const currentRotation = useRef({ rotX: target.current.rotX, rotY: target.current.rotY, rotZ: target.current.rotZ });
   const currentQuaternion = useRef(new THREE.Quaternion());
   const targetQuaternion = useRef(new THREE.Quaternion());
-  const currentPointerX = useRef(0);
   const pointerTarget = useRef(new THREE.Vector2(10, 10));
   // DEBUG: remove before merge
   const renderDebugRef = useRef({ loggedMount: false, lastBucket: -1 });
@@ -469,14 +468,6 @@ function GliderRig({ url, target, mode }: RigProps) {
     currentRotation.current.rotY = THREE.MathUtils.damp(currentRotation.current.rotY, tgt.rotY, 3.5, dt);
     currentRotation.current.rotZ = THREE.MathUtils.damp(currentRotation.current.rotZ, tgt.rotZ, 3.5, dt);
 
-    // Parallax pointer sway
-    currentPointerX.current = THREE.MathUtils.damp(
-      currentPointerX.current,
-      state.pointer.x * 0.25 * (isMobile ? 0.4 : 1),
-      3,
-      dt
-    );
-
     // 1. Compute real per-frame movement vector in screen coordinates (down = positive Y)
     const screenDx = c.x - prevDampedPos.current.x;
     const screenDy = -(c.y - prevDampedPos.current.y);
@@ -513,7 +504,7 @@ function GliderRig({ url, target, mode }: RigProps) {
     // 5. Apply position on positionGroup and rotation on rotationGroup separately
     if (positionGroup.current) {
       const float = Math.sin(t * 0.8) * 0.035;
-      positionGroup.current.position.set(c.x + currentPointerX.current, c.y + float, 0);
+      positionGroup.current.position.set(c.x, c.y + float, 0);
       positionGroup.current.scale.setScalar(c.scale);
     }
 
