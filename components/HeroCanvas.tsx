@@ -36,8 +36,8 @@ export const FLIGHT_WAYPOINTS: RelativeWaypoint[] = [
   { xPct: 0.58, yPct: 0.14, scale: 0.96, rotX: -0.04, rotY: 0.12, rotZ: 0.2, duration: 0.36 },
   // 3. Cross left in an S-curve
   { xPct: -0.55, yPct: -0.46, scale: 0.92, rotX: 0.1, rotY: -0.16, rotZ: -0.24, duration: 0.36 },
-  // 4. Drop straight down toward the footer; no sweeping final turn
-  { xPct: -0.55, yPct: -0.72, scale: 0.88, rotX: 0, rotY: 0, rotZ: -Math.PI / 2, duration: 0.28 },
+  // 4. Drop straight down through the centre; no sweeping final turn
+  { xPct: 0, yPct: -0.72, scale: 1.02, rotX: 0, rotY: 0, rotZ: -Math.PI / 2, duration: 0.28 },
 ];
 
 export function getViewportBounds() {
