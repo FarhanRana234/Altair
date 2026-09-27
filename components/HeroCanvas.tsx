@@ -158,7 +158,7 @@ export default function HeroCanvas() {
       target.current.scale = scale * (bounds.isMobile ? 0.36 : 0.52);
       target.current.rotX = THREE.MathUtils.lerp(0.16, -0.22, t);
       target.current.rotY = THREE.MathUtils.clamp(curvature * 0.35, -0.14, 0.14);
-      target.current.rotZ = curvature;
+      target.current.rotZ = tangentAngle;
     };
 
     const buildTimeline = () => {

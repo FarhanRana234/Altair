@@ -43,7 +43,7 @@ export function normalizeAngle(a: number): number {
 
 useGLTF.preload(LOCAL_GLIDER_URL);
 
-const PARTICLE_COUNT = 4500;
+const PARTICLE_COUNT = 9000;
 
 const particleVertexShader = `
   attribute vec3 a_target;
@@ -313,6 +313,37 @@ function GliderRig({ url, target, mode }: RigProps) {
   const currentQuaternion = useRef(new THREE.Quaternion());
   const targetQuaternion = useRef(new THREE.Quaternion());
   const currentPointerX = useRef(0);
+  const pointerTarget = useRef(new THREE.Vector2(10, 10));
+  useEffect(() => {
+    const updatePointer = (clientX: number, clientY: number) => {
+      pointerTarget.current.set(
+        (clientX / window.innerWidth) * 2 - 1,
+        1 - (clientY / window.innerHeight) * 2,
+      );
+    };
+    const handleMouseMove = (event: MouseEvent) => updatePointer(event.clientX, event.clientY);
+    const handleTouchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (touch) updatePointer(touch.clientX, touch.clientY);
+    };
+    const handleTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (touch) updatePointer(touch.clientX, touch.clientY);
+    };
+    const handleTouchEnd = () => pointerTarget.current.set(10, 10);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchcancel", handleTouchEnd);
+    };
+  }, []);
   const shaderUniforms = useMemo(() => ({
     u_time: { value: 0 },
     u_transition: { value: 0 },
@@ -368,10 +399,11 @@ function GliderRig({ url, target, mode }: RigProps) {
       2.8,
       dt,
     );
-    shaderUniforms.u_mouse.value.x = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.x, state.pointer.x * 0.85, 4.5, dt);
-    shaderUniforms.u_mouse.value.y = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.y, state.pointer.y * 0.58, 4.5, dt);
-    shaderUniforms.u_mouse.value.z = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.z, 0, 4.5, dt);
-
+    const pointerX = prefersReducedMotion ? 10 : pointerTarget.current.x;
+    const pointerY = prefersReducedMotion ? 10 : pointerTarget.current.y;
+    shaderUniforms.u_mouse.value.x = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.x, pointerX, 8, dt);
+    shaderUniforms.u_mouse.value.y = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.y, pointerY, 8, dt);
+    shaderUniforms.u_mouse.value.z = 0;
     // Smoothly and slowly damp position towards scroll target
     c.x = THREE.MathUtils.damp(c.x, tgt.x, 3.5, dt);
     c.y = THREE.MathUtils.damp(c.y, tgt.y, 3.5, dt);
@@ -400,9 +432,10 @@ function GliderRig({ url, target, mode }: RigProps) {
     // Base offset: 0 because nose lines up with angle 0 (towards right) in screen coordinates
     const baseOffset = 0;
 
-    if (speed > 0.0003) {
-      const angleDeg = Math.atan2(screenDy, screenDx) * (180 / Math.PI) + baseOffset;
-      targetAngle.current = normalizeAngle(angleDeg);
+    if (Math.abs(tgt.rotZ) > 0.0001 || speed > 0.0003) {
+      targetAngle.current = Math.abs(tgt.rotZ) > 0.0001
+        ? normalizeAngle((tgt.rotZ * 180) / Math.PI)
+        : normalizeAngle(Math.atan2(screenDy, screenDx) * (180 / Math.PI) + baseOffset);
     }
 
     // 3. Interpolate angles by shortest path smoothly
@@ -460,7 +493,7 @@ function GliderRig({ url, target, mode }: RigProps) {
         new THREE.Euler(
           currentRotation.current.rotX,
           currentRotation.current.rotY,
-          currentRotation.current.rotZ,
+          0,
           "XYZ",
         ),
       );
@@ -486,7 +519,7 @@ function GliderRig({ url, target, mode }: RigProps) {
 
   return (
     <group ref={positionGroup}>
-      <group rotation={[0.18, -0.1, 0.16]}>
+      <group>
         <group ref={rotationGroup}>
         {pointsGeometry ? (
           <points ref={pointsRef} geometry={pointsGeometry} frustumCulled={false}>
