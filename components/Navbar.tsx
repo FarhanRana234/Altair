@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
@@ -29,6 +29,27 @@ const item: Variants = {
 
 export default function Navbar({ onSponsorClick }: { onSponsorClick: () => void }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("#top");
+
+  useEffect(() => {
+    const sections = LINKS.map((link) => document.querySelector(link.href)).filter(
+      (section): section is Element => Boolean(section),
+    );
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleSection = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visibleSection?.target.id) setActiveSection(`#${visibleSection.target.id}`);
+      },
+      { rootMargin: "-25% 0px -60%", threshold: [0, 0.25, 0.5, 1] },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <>
@@ -53,6 +74,36 @@ export default function Navbar({ onSponsorClick }: { onSponsorClick: () => void 
             />
           </a>
         </motion.div>
+
+        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+          {LINKS.map((link) => {
+            const isActive = activeSection === link.href;
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                aria-current={isActive ? "page" : undefined}
+                className={`group relative px-3 py-2 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors ${
+                  isActive ? "text-white" : "text-slate-300 hover:text-white"
+                }`}
+              >
+                {link.label}
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-x-3 -bottom-1 h-px bg-white transition-opacity ${
+                    isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                  }`}
+                />
+              </a>
+            );
+          })}
+          <button
+            onClick={onSponsorClick}
+            className="ml-3 rounded-full border border-[#7DA7D9]/70 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#DCEBFF] transition-all hover:border-white hover:bg-white hover:text-[#071834]"
+          >
+            Sponsor Us
+          </button>
+        </nav>
 
         {/* Menu toggle */}
         <div className="flex items-center gap-3">
