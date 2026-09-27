@@ -197,7 +197,9 @@ function GliderRig({ url, target, mode }: Props) {
   const targetQuaternion = useRef(new THREE.Quaternion());
   const headingQuaternion = useRef(new THREE.Quaternion());
   const bankQuaternion = useRef(new THREE.Quaternion());
-  const forwardAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
+  // The imported glider points along local -Y; using the actual nose axis prevents
+  // the model from appearing to reverse or flip while it follows the path.
+  const forwardAxis = useMemo(() => new THREE.Vector3(0, -1, 0), []);
   const flightDirection = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2(10, 10));
   const texture = useMemo(() => dotTexture(), []);
