@@ -197,10 +197,6 @@ function GliderRig({ url, target, mode }: Props) {
   const targetQuaternion = useRef(new THREE.Quaternion());
   const headingQuaternion = useRef(new THREE.Quaternion());
   const bankQuaternion = useRef(new THREE.Quaternion());
-  const screenCorrection = useMemo(
-    () => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -Math.PI / 3),
-    [],
-  );
   const forwardAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
   const flightDirection = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2(10, 10));
@@ -299,16 +295,16 @@ function GliderRig({ url, target, mode }: Props) {
       // keep a visible 3D angle without ever inverting the aircraft.
       // Apply the authored screen-facing offset so the initial hero pose reads
       // as a shallow banked glide rather than standing vertically.
-      const heading = active.rotZ + Math.PI / 2 - Math.PI / 3;
+      // The sampled mesh's nose is opposite the screen-space +Y axis.
+      // Reverse the heading so leftward travel shows the nose pointing right,
+      // matching the intended opening pose and the lower flight direction.
+      const heading = active.rotZ + Math.PI / 2 + Math.PI;
       flightDirection.set(Math.cos(heading), Math.sin(heading), 0).normalize();
       headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
-      // The source mesh is authored inverted around its forward axis; this
-      // half-turn puts the tail fin above the fuselage, with a slight bank.
-      bankQuaternion.current.setFromAxisAngle(forwardAxis, Math.PI + 0.24);
-      targetQuaternion.current
-        .copy(screenCorrection)
-        .multiply(headingQuaternion.current)
-        .multiply(bankQuaternion.current);
+      // Bank only around the nose axis. Do not add a half-turn here: it flips
+      // the underside to the top during the lower part of the flight.
+      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.24);
+      targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
     }
