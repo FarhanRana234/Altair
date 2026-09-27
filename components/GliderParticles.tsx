@@ -240,7 +240,20 @@ function GliderRig({ url, target, mode }: RigProps) {
   const geometries = useMemo(() => collectAllGeometries(scene), [scene]);
 
   const pointsGeometry = useMemo(() => {
-    if (!geometries.length) return null;
+    if (!geometries.length) return null; // DEBUG: remove before merge
+    // DEBUG: remove before merge
+    console.log("[v0] DEBUG glider source geometry", {
+      url,
+      meshCount: geometries.length,
+      meshes: geometries.map((geometry, index) => ({
+        index,
+        vertices: geometry.attributes.position?.count ?? 0,
+        triangles: geometry.index ? geometry.index.count / 3 : (geometry.attributes.position?.count ?? 0) / 3,
+        indexed: Boolean(geometry.index),
+        area: geometryTriangles(geometry).totalArea,
+      })),
+      configuredSampleCount: PARTICLE_COUNT,
+    });
     const positions = new Float32Array(PARTICLE_COUNT * 3);
     const areas = geometries.map((g) => geometryTriangles(g).totalArea);
     const total = areas.reduce((sum, a) => sum + a, 0);
@@ -280,8 +293,23 @@ function GliderRig({ url, target, mode }: RigProps) {
     buffer.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     buffer.setAttribute("a_target", new THREE.BufferAttribute(targets, 3));
     buffer.setAttribute("a_size", new THREE.BufferAttribute(sizes, 1));
+    // DEBUG: remove before merge
+    const debugGeometry = {
+      actualPointCount: buffer.getAttribute("position").count,
+      positionArrayLength: positions.length,
+      configuredSampleCount: PARTICLE_COUNT,
+      targetCount: buffer.getAttribute("a_target").count,
+      sizeRange: {
+        min: Math.min(...sizes),
+        max: Math.max(...sizes),
+        average: sizes.reduce((sum, size) => sum + size, 0) / sizes.length,
+      },
+    };
+    // DEBUG: remove before merge
+    console.log("[v0] DEBUG particle geometry built", debugGeometry);
+    (window as Window & { __altairParticleDebug?: unknown }).__altairParticleDebug = debugGeometry;
     return buffer;
-  }, [geometries, normalization]);
+  }, [geometries, normalization, url]);
 
   const dotTexture = useMemo(() => makeSoftDotTexture(), []);
 
@@ -314,6 +342,8 @@ function GliderRig({ url, target, mode }: RigProps) {
   const targetQuaternion = useRef(new THREE.Quaternion());
   const currentPointerX = useRef(0);
   const pointerTarget = useRef(new THREE.Vector2(10, 10));
+  // DEBUG: remove before merge
+  const renderDebugRef = useRef({ loggedMount: false, lastBucket: -1 });
   useEffect(() => {
     const updatePointer = (clientX: number, clientY: number) => {
       pointerTarget.current.set(
@@ -391,6 +421,33 @@ function GliderRig({ url, target, mode }: RigProps) {
     }
 
     const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+    // DEBUG: remove before merge
+    if (pointsRef.current && !renderDebugRef.current.loggedMount) {
+      const renderer = state.gl;
+      const positionAttribute = pointsRef.current.geometry.getAttribute("position");
+      const sizes = pointsRef.current.geometry.getAttribute("a_size");
+      const sizeValues = sizes.array as Float32Array;
+      const cameraDistance = pointsRef.current.getWorldPosition(new THREE.Vector3()).distanceTo(state.camera.position);
+      const debugRender = {
+        actualPointCount: positionAttribute.count,
+        devicePixelRatio: window.devicePixelRatio,
+        cssResolution: { width: window.innerWidth, height: window.innerHeight },
+        drawingBufferResolution: { width: renderer.domElement.width, height: renderer.domElement.height },
+        camera: { position: state.camera.position.toArray(), fov: (state.camera as THREE.PerspectiveCamera).fov, near: state.camera.near, far: state.camera.far },
+        cameraDistance,
+        pointSizeFormula: "a_size * (300.0 / max(1.0, -mvPosition.z))",
+        representativePointSizes: [0, Math.floor(sizeValues.length / 2), sizeValues.length - 1].map((index) => ({
+          a_size: sizeValues[index],
+          estimatedGlPointSize: sizeValues[index] * (300 / Math.max(1, cameraDistance)),
+        })),
+        shaderTransparency: { additiveBlending: true, depthWrite: false, alphaBase: 0.72, fragmentDiscardBelow: 0.04 },
+      };
+      // DEBUG: remove before merge
+      console.log("[v0] DEBUG particle render mount", debugRender);
+      (window as Window & { __altairParticleRenderDebug?: unknown }).__altairParticleRenderDebug = debugRender;
+      renderDebugRef.current.loggedMount = true;
+    }
 
     shaderUniforms.u_time.value = t;
     shaderUniforms.u_transition.value = THREE.MathUtils.damp(
