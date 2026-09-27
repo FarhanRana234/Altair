@@ -25,17 +25,7 @@ const METRICS: Metric[] = [
     label: "Top Score",
     sublabel: "Highest Engineering & Design score nationally",
   },
-  {
-    value: "1800",
-    suffix: "+",
-    label: "Attendees",
-    sublabel: "Karachi Expo Centre audience reach",
-  },
-  {
-    value: "6",
-    label: "Engineers",
-    sublabel: "Multidisciplinary team from NEDUET & CUST",
-  },
+
 ];
 
 function formatNumber(raw: string): number {

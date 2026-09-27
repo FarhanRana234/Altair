@@ -13,11 +13,11 @@
   --color-blue-light: #7DA7D9;
   --color-blue-mid: #6484B5;
   --color-blue-deep: #446391;
-  --color-navy-bg: #071834;
+  --color-navy-bg: #061a3a;
 
   /* Backward-compatible aliases mapped to the brand palette */
-  --space-deep: #071834;
-  --space-navy: #071834;
+  --space-deep: #061a3a;
+  --space-navy: #061a3a;
   --cyan: #7DA7D9;
 }
 
@@ -59,7 +59,7 @@ body {
 
 @layer components {
   .glass-card {
-    @apply border border-[#446391]/30 bg-[#071834]/75 backdrop-blur-md rounded-2xl;
+    @apply border border-[#446391]/30 bg-[#061a3a]/75 backdrop-blur-md rounded-2xl;
     max-width: 90vw;
     overflow-y: auto;
   }
@@ -101,7 +101,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 22px;
   height: 22px;
   border-radius: 9999px;
-  background: #071834;
+  background: #061a3a;
   border: 2px solid #7DA7D9;
   box-shadow: 0 0 16px rgba(125, 167, 217, 0.5);
 }
@@ -110,7 +110,7 @@ input[type="range"]::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 9999px;
-  background: #071834;
+  background: #061a3a;
   border: 2px solid #7DA7D9;
   box-shadow: 0 0 16px rgba(125, 167, 217, 0.5);
 }

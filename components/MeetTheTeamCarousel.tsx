@@ -8,7 +8,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 type TeamMember = {
   name: string;
   role: string;
-  institution: string;
+  institution?: string;
   quote: string;
   image: string;
 };
@@ -52,7 +52,6 @@ const TEAM_MEMBERS: TeamMember[] = [
   {
     name: "Syeda Shanza Fatima",
     role: "CAD",
-    institution: "NEDUET",
     quote: "See you with a goated glider on my side",
     image: "/team/shanza.png",
   },
@@ -147,10 +146,12 @@ export default function MeetTheTeamCarousel() {
                     <span className="text-[#7DA7D9] uppercase font-normal">Role:</span>
                     <span className="text-white">{current.role}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#7DA7D9] uppercase font-normal">Institution:</span>
-                    <span className="text-white">{current.institution}</span>
-                  </div>
+                  {current.institution ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#7DA7D9] uppercase font-normal">Institution:</span>
+                      <span className="text-white">{current.institution}</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 

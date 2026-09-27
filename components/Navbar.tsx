@@ -64,30 +64,8 @@ export default function Navbar({ onSponsorClick }: { onSponsorClick: () => void 
           </a>
         </motion.div>
 
-        {/* Desktop Nav */}
-        <motion.nav variants={item} className="hidden items-center gap-7 lg:flex">
-          {LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="font-mono text-[12px] font-normal tracking-[0.2em] text-slate-300 uppercase transition-colors hover:text-[#7DA7D9]"
-            >
-              {link.label}
-            </a>
-          ))}
-        </motion.nav>
-
-        {/* Desktop CTA & Mobile Toggle */}
+        {/* Menu toggle */}
         <div className="flex items-center gap-3">
-          <motion.button
-            variants={item}
-            onClick={onSponsorClick}
-            className="hidden sm:inline-flex items-center justify-center rounded-full border border-[#7DA7D9]/50 bg-[#7DA7D9]/10 px-5 py-2 font-mono text-[12px] font-normal tracking-widest text-[#7DA7D9] uppercase transition-all hover:bg-[#7DA7D9] hover:text-[#071834] hover:shadow-[0_0_20px_rgba(125,167,217,0.4)]"
-          >
-            Sponsor Us
-          </motion.button>
-
-          {/* Mobile hamburger button (min 44x44px touch target) */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open navigation menu"}

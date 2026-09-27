@@ -22,7 +22,7 @@ const COLORS = [
 
 function getStarCount(width: number, height: number) {
   const area = width * height;
-  const density = width >= 1200 ? 2600 : width >= 768 ? 2100 : 1500;
+  const density = width >= 1200 ? 1900 : width >= 768 ? 1500 : 1050;
   return Math.round(Math.min(density, Math.max(900, area / (width >= 768 ? 2600 : 3400))));
 }
 
@@ -49,7 +49,7 @@ export default function Starfield({ className }: { className?: string }) {
 
     let width = window.innerWidth;
     let height = window.innerHeight;
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let dpr = Math.min(window.devicePixelRatio || 1, 3);
     let stars = buildStars(getStarCount(width, height), width, height);
     let scrollY = window.scrollY;
     let raf = 0;
@@ -57,7 +57,7 @@ export default function Starfield({ className }: { className?: string }) {
     const resize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 3);
       canvas.width = Math.floor(width * dpr);
       canvas.height = Math.floor(height * dpr);
       canvas.style.width = `${width}px`;

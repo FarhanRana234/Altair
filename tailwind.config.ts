@@ -13,16 +13,16 @@ const config: Config = {
           "blue-light": "#7DA7D9",
           "blue-mid": "#6484B5",
           "blue-deep": "#446391",
-          "navy-bg": "#071834",
+          "navy-bg": "#061a3a",
         },
         // Direct utility aliases matching brand tokens
-        "navy-bg": "#071834",
+        "navy-bg": "#061a3a",
         "blue-light": "#7DA7D9",
         "blue-mid": "#6484B5",
         "blue-deep": "#446391",
         space: {
-          DEFAULT: "#071834",
-          deep: "#071834",
+          DEFAULT: "#061a3a",
+          deep: "#061a3a",
         },
         accent: {
           cyan: "#7DA7D9",
