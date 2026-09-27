@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF, Preload } from "@react-three/drei";
+import { Preload, useGLTF } from "@react-three/drei";
 import {
   LOCAL_GLIDER_URL,
-  normalizingMatrix,
   decomposeMatrix,
+  normalizingMatrix,
 } from "../lib/gltf";
 
 export type VisualMode = "particles" | "solid";
@@ -21,31 +21,12 @@ export type GliderTarget = {
   rotZ: number;
 };
 
-/**
- * Computes shortest angular distance from a0 to a1 in degrees.
- * Handles wrap-around so 170° -> -170° sweeps 20° through 180° instead of 340° through 0°.
- */
-export function shortAngleDist(a0: number, a1: number): number {
-  const max = 360;
-  const da = (a1 - a0) % max;
-  return ((2 * da) % max) - da;
-}
-
-/**
- * Normalizes any angle in degrees into [-180, 180].
- * Prevents unbounded growth over long scroll sessions.
- */
-export function normalizeAngle(a: number): number {
-  let angle = (a + 180) % 360;
-  if (angle < 0) angle += 360;
-  return angle - 180;
-}
-
 useGLTF.preload(LOCAL_GLIDER_URL);
 
+// Keep the finalized desktop/mobile density unchanged.
 const PARTICLE_COUNT = 18000;
 
-const particleVertexShader = `
+const vertexShader = `
   attribute vec3 a_target;
   attribute float a_size;
   uniform float u_time;
@@ -60,11 +41,11 @@ const particleVertexShader = `
     vec4 baseClip = projectionMatrix * baseView;
     vec2 baseNdc = baseClip.xy / max(abs(baseClip.w), 0.0001);
     vec2 pointerDelta = baseNdc - u_mouse.xy;
-    float distanceToPointer = length(pointerDelta);
-    float influence = exp(-distanceToPointer * distanceToPointer * 18.0);
-    vec3 localForce = normalize(vec3(pointerDelta.x, pointerDelta.y, 0.0) + vec3(0.0001));
-    vec3 displaced = base + localForce * influence * 0.13;
-    displaced += vec3(0.0, sin(u_time * 0.55 + position.x * 8.0) * 0.004, 0.0);
+    float influence = exp(-dot(pointerDelta, pointerDelta) * 18.0);
+    vec3 forceDirection = normalize(vec3(pointerDelta, 0.0001));
+    vec3 displaced = base + forceDirection * influence * 0.13;
+    displaced.y += sin(u_time * 0.55 + position.x * 8.0) * 0.004;
+
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
     gl_Position = projectionMatrix * mvPosition;
     gl_PointSize = a_size * (300.0 / max(1.0, -mvPosition.z));
@@ -73,7 +54,7 @@ const particleVertexShader = `
   }
 `;
 
-const particleFragmentShader = `
+const fragmentShader = `
   uniform sampler2D u_map;
   varying vec3 v_color;
   varying float v_alpha;
@@ -85,537 +66,272 @@ const particleFragmentShader = `
   }
 `;
 
-type RigProps = {
+type Props = {
   url: string;
   target: React.MutableRefObject<GliderTarget>;
   mode: VisualMode;
 };
 
-function makeSoftDotTexture(): THREE.CanvasTexture {
+function dotTexture() {
   const size = 64;
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  if (ctx) {
-    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  const context = canvas.getContext("2d");
+  if (context) {
+    const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
     gradient.addColorStop(0, "rgba(255,255,255,1)");
-    gradient.addColorStop(0.35, "rgba(255,255,255,0.75)");
+    gradient.addColorStop(0.35, "rgba(255,255,255,.75)");
     gradient.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, size, size);
   }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
+  return new THREE.CanvasTexture(canvas);
 }
 
-function geometryTriangles(
-  geometry: THREE.BufferGeometry
-): { triangles: Array<[number, number, number]>; totalArea: number } {
-  const pos = geometry.attributes.position as THREE.BufferAttribute;
-  const index = geometry.index;
-  const triangles: Array<[number, number, number]> = [];
+function getMeshes(scene: THREE.Object3D) {
+  const meshes: THREE.Mesh[] = [];
+  scene.traverse((object) => {
+    const mesh = object as THREE.Mesh;
+    if (mesh.isMesh && mesh.geometry) meshes.push(mesh);
+  });
+  return meshes;
+}
 
+function triangles(geometry: THREE.BufferGeometry) {
+  const position = geometry.getAttribute("position") as THREE.BufferAttribute;
+  const index = geometry.index;
+  const result: Array<[number, number, number]> = [];
   if (index) {
     for (let i = 0; i < index.count; i += 3) {
-      triangles.push([index.getX(i), index.getX(i + 1), index.getX(i + 2)]);
+      result.push([index.getX(i), index.getX(i + 1), index.getX(i + 2)]);
     }
   } else {
-    for (let i = 0; i < pos.count; i += 3) {
-      triangles.push([i, i + 1, i + 2]);
-    }
+    for (let i = 0; i < position.count; i += 3) result.push([i, i + 1, i + 2]);
   }
+  return result;
+}
 
+function areaData(geometry: THREE.BufferGeometry) {
+  const position = geometry.getAttribute("position") as THREE.BufferAttribute;
+  const faces = triangles(geometry);
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
   const c = new THREE.Vector3();
-  const ab = new THREE.Vector3();
-  const ac = new THREE.Vector3();
-  let totalArea = 0;
-  for (let t = 0; t < triangles.length; t += 1) {
-    const [i0, i1, i2] = triangles[t];
-    a.fromBufferAttribute(pos, i0);
-    b.fromBufferAttribute(pos, i1);
-    c.fromBufferAttribute(pos, i2);
-    ab.subVectors(b, a);
-    ac.subVectors(c, a);
-    totalArea += ab.cross(ac).length() * 0.5;
+  let area = 0;
+  for (const [i0, i1, i2] of faces) {
+    a.fromBufferAttribute(position, i0);
+    b.fromBufferAttribute(position, i1);
+    c.fromBufferAttribute(position, i2);
+    area += new THREE.Triangle(a, b, c).getArea();
   }
-  return { triangles, totalArea };
+  return { faces, area };
 }
 
-function collectAllGeometries(scene: THREE.Object3D): THREE.BufferGeometry[] {
-  const all: THREE.BufferGeometry[] = [];
-  scene.traverse((obj) => {
-    const mesh = obj as THREE.Mesh;
-    if (mesh.isMesh && mesh.geometry) {
-      all.push(mesh.geometry);
-    }
-  });
-  return all;
-}
-
-function sampleForGeometry(
-  geometry: THREE.BufferGeometry,
-  count: number,
-  out: Float32Array,
-  offset: number
-): number {
-  const { triangles, totalArea } = geometryTriangles(geometry);
-  if (!triangles.length || totalArea <= 0) return offset;
-
-  const pos = geometry.attributes.position as THREE.BufferAttribute;
-  const cum = new Float32Array(triangles.length);
-  let running = 0;
-  for (let t = 0; t < triangles.length; t += 1) {
-    const [i0, i1, i2] = triangles[t];
-    const a = new THREE.Vector3().fromBufferAttribute(pos, i0);
-    const b = new THREE.Vector3().fromBufferAttribute(pos, i1);
-    const c = new THREE.Vector3().fromBufferAttribute(pos, i2);
-    running += b.clone().sub(a).cross(c.clone().sub(a)).length() * 0.5;
-    cum[t] = running;
-  }
-
+function sample(geometry: THREE.BufferGeometry, amount: number, output: Float32Array, offset: number) {
+  const position = geometry.getAttribute("position") as THREE.BufferAttribute;
+  const { faces, area } = areaData(geometry);
+  if (!faces.length || area <= 0) return offset;
+  const cumulative = new Float32Array(faces.length);
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
   const c = new THREE.Vector3();
-  for (let p = 0; p < count; p += 1) {
-    const r = Math.random() * totalArea;
-    let lo = 0;
-    let hi = triangles.length - 1;
-    while (lo < hi) {
-      const mid = (lo + hi) >> 1;
-      if (cum[mid] < r) lo = mid + 1;
-      else hi = mid;
+  let total = 0;
+  for (let i = 0; i < faces.length; i += 1) {
+    const [i0, i1, i2] = faces[i];
+    a.fromBufferAttribute(position, i0);
+    b.fromBufferAttribute(position, i1);
+    c.fromBufferAttribute(position, i2);
+    total += new THREE.Triangle(a, b, c).getArea();
+    cumulative[i] = total;
+  }
+  for (let p = 0; p < amount; p += 1) {
+    const pick = Math.random() * area;
+    let low = 0;
+    let high = faces.length - 1;
+    while (low < high) {
+      const middle = (low + high) >> 1;
+      if (cumulative[middle] < pick) low = middle + 1;
+      else high = middle;
     }
-    const [i0, i1, i2] = triangles[lo];
-    a.fromBufferAttribute(pos, i0);
-    b.fromBufferAttribute(pos, i1);
-    c.fromBufferAttribute(pos, i2);
+    const [i0, i1, i2] = faces[low];
+    a.fromBufferAttribute(position, i0);
+    b.fromBufferAttribute(position, i1);
+    c.fromBufferAttribute(position, i2);
     const root = Math.sqrt(Math.random());
-    const s2 = Math.random();
+    const s = Math.random();
     const u = 1 - root;
-    const v = root * (1 - s2);
-    const w = s2 * root;
-    out[(offset + p) * 3] = a.x * u + b.x * v + c.x * w;
-    out[(offset + p) * 3 + 1] = a.y * u + b.y * v + c.y * w;
-    out[(offset + p) * 3 + 2] = a.z * u + b.z * v + c.z * w;
+    const v = root * (1 - s);
+    const w = root * s;
+    const index = (offset + p) * 3;
+    output[index] = a.x * u + b.x * v + c.x * w;
+    output[index + 1] = a.y * u + b.y * v + c.y * w;
+    output[index + 2] = a.z * u + b.z * v + c.z * w;
   }
-  return offset + count;
+  return offset + amount;
 }
 
-function makeColors(positions: Float32Array): Float32Array {
-  const colors = new Float32Array(positions.length);
-  const white = new THREE.Color("#ffffff");
-  const lightBlue = new THREE.Color("#7DA7D9");
-  const midBlue = new THREE.Color("#6484B5");
-  const deepBlue = new THREE.Color("#446391");
-  for (let i = 0; i < positions.length / 3; i += 1) {
-    const y = positions[i * 3 + 1];
-    const t = THREE.MathUtils.clamp((y + 0.25) / 0.75, 0, 1);
-    const color = white.clone().lerp(lightBlue, t);
-    if (Math.random() < 0.15) color.lerp(midBlue, 0.7);
-    if (Math.random() < 0.08) color.lerp(deepBlue, 0.85);
-    colors[i * 3] = color.r;
-    colors[i * 3 + 1] = color.g;
-    colors[i * 3 + 2] = color.b;
+function colors(positions: Float32Array) {
+  const output = new Float32Array(positions.length);
+  const top = new THREE.Color("#ffffff");
+  const blue = new THREE.Color("#7DA7D9");
+  const mid = new THREE.Color("#6484B5");
+  for (let i = 0; i < positions.length; i += 3) {
+    const color = top.clone().lerp(blue, THREE.MathUtils.clamp((positions[i + 1] + 0.25) / 0.75, 0, 1));
+    if (Math.random() < 0.15) color.lerp(mid, 0.7);
+    output[i] = color.r;
+    output[i + 1] = color.g;
+    output[i + 2] = color.b;
   }
-  return colors;
+  return output;
 }
 
-function GliderRig({ url, target, mode }: RigProps) {
+function GliderRig({ url, target, mode }: Props) {
   const { scene } = useGLTF(url);
-  const positionGroup = useRef<THREE.Group>(null);
-  const rotationGroup = useRef<THREE.Group>(null);
-  const pointsRef = useRef<THREE.Points>(null);
-  const solidsRef = useRef<THREE.Group>(null);
-
+  const root = useRef<THREE.Group>(null);
+  const orientation = useRef<THREE.Group>(null);
+  const points = useRef<THREE.Points>(null);
+  const solids = useRef<THREE.Group>(null);
+  const current = useRef({ ...target.current });
+  const currentQuaternion = useRef(new THREE.Quaternion());
+  const targetQuaternion = useRef(new THREE.Quaternion());
+  const pointer = useRef(new THREE.Vector2(10, 10));
+  const texture = useMemo(() => dotTexture(), []);
+  const meshes = useMemo(() => getMeshes(scene), [scene]);
   const normalization = useMemo(() => {
     const matrix = normalizingMatrix(scene);
-    const { position, quaternion, scale } = decomposeMatrix(matrix);
-    return { position, rotation: new THREE.Euler().setFromQuaternion(quaternion), scale, matrix };
+    const decomposed = decomposeMatrix(matrix);
+    return { ...decomposed, rotation: new THREE.Euler().setFromQuaternion(decomposed.quaternion), matrix };
   }, [scene]);
 
-  const geometries = useMemo(() => collectAllGeometries(scene), [scene]);
-
-  const pointsGeometry = useMemo(() => {
-    if (!geometries.length) return null; // DEBUG: remove before merge
-    // DEBUG: remove before merge
-    console.log("[v0] DEBUG glider source geometry", {
-      url,
-      meshCount: geometries.length,
-      meshes: geometries.map((geometry, index) => ({
-        index,
-        vertices: geometry.attributes.position?.count ?? 0,
-        triangles: geometry.index ? geometry.index.count / 3 : (geometry.attributes.position?.count ?? 0) / 3,
-        indexed: Boolean(geometry.index),
-        area: geometryTriangles(geometry).totalArea,
-      })),
-      configuredSampleCount: PARTICLE_COUNT,
-    });
+  const geometry = useMemo(() => {
+    if (!meshes.length) return null;
     const positions = new Float32Array(PARTICLE_COUNT * 3);
-    const areas = geometries.map((g) => geometryTriangles(g).totalArea);
-    const total = areas.reduce((sum, a) => sum + a, 0);
+    const data = meshes.map((mesh) => ({ geometry: mesh.geometry, area: areaData(mesh.geometry).area }));
+    const totalArea = data.reduce((sum, item) => sum + item.area, 0);
     let offset = 0;
-    if (total > 0) {
-      for (let g = 0; g < geometries.length; g += 1) {
-        const share = Math.max(1, Math.round((areas[g] / total) * PARTICLE_COUNT));
-        offset = sampleForGeometry(geometries[g], share, positions, offset);
-      }
+    data.forEach((item, index) => {
+      const amount = index === data.length - 1
+        ? PARTICLE_COUNT - offset
+        : Math.max(1, Math.round((item.area / totalArea) * PARTICLE_COUNT));
+      offset = sample(item.geometry, amount, positions, offset);
+    });
+    const vector = new THREE.Vector3();
+    for (let i = 0; i < PARTICLE_COUNT; i += 1) {
+      vector.fromArray(positions, i * 3).applyMatrix4(normalization.matrix).toArray(positions, i * 3);
     }
-    if (offset < PARTICLE_COUNT) {
-      sampleForGeometry(geometries[0], PARTICLE_COUNT - offset, positions, offset);
-    }
-
-    const v = new THREE.Vector3();
-    for (let p = 0; p < PARTICLE_COUNT; p += 1) {
-      v.set(positions[p * 3], positions[p * 3 + 1], positions[p * 3 + 2]);
-      v.applyMatrix4(normalization.matrix);
-      positions[p * 3] = v.x;
-      positions[p * 3 + 1] = v.y;
-      positions[p * 3 + 2] = v.z;
-    }
-
-    const colors = makeColors(positions);
     const targets = new Float32Array(PARTICLE_COUNT * 3);
+    const sizes = new Float32Array(PARTICLE_COUNT);
     for (let i = 0; i < PARTICLE_COUNT; i += 1) {
       const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
       const radius = 0.62 + (i % 17) * 0.006;
       targets[i * 3] = Math.cos(angle) * radius;
       targets[i * 3 + 1] = Math.sin(angle) * radius * 0.42;
-      targets[i * 3 + 2] = Math.sin(angle * 3.0) * 0.035;
+      targets[i * 3 + 2] = Math.sin(angle * 3) * 0.035;
+      sizes[i] = 0.04 + Math.random() * 0.025;
     }
-    const sizes = new Float32Array(PARTICLE_COUNT);
-    for (let i = 0; i < PARTICLE_COUNT; i += 1) sizes[i] = 0.04 + Math.random() * 0.025;
-    const buffer = new THREE.BufferGeometry();
-    buffer.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    buffer.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    buffer.setAttribute("a_target", new THREE.BufferAttribute(targets, 3));
-    buffer.setAttribute("a_size", new THREE.BufferAttribute(sizes, 1));
-    // DEBUG: remove before merge
-    const debugGeometry = {
-      actualPointCount: buffer.getAttribute("position").count,
-      positionArrayLength: positions.length,
-      configuredSampleCount: PARTICLE_COUNT,
-      targetCount: buffer.getAttribute("a_target").count,
-      sizeRange: {
-        min: sizes.reduce((min, size) => Math.min(min, size), Number.POSITIVE_INFINITY),
-        max: sizes.reduce((max, size) => Math.max(max, size), Number.NEGATIVE_INFINITY),
-        average: sizes.reduce((sum, size) => sum + size, 0) / sizes.length,
-      },
-    };
-    // DEBUG: remove before merge
-    console.log("[v0] DEBUG particle geometry built", debugGeometry);
-    (window as Window & { __altairParticleDebug?: unknown }).__altairParticleDebug = debugGeometry;
-    return buffer;
-  }, [geometries, normalization, url]);
+    const result = new THREE.BufferGeometry();
+    result.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    result.setAttribute("color", new THREE.BufferAttribute(colors(positions), 3));
+    result.setAttribute("a_target", new THREE.BufferAttribute(targets, 3));
+    result.setAttribute("a_size", new THREE.BufferAttribute(sizes, 1));
+    return result;
+  }, [meshes, normalization]);
 
-  const dotTexture = useMemo(() => makeSoftDotTexture(), []);
-
-  useEffect(() => {
-    return () => {
-      dotTexture.dispose();
-      if (pointsGeometry) {
-        pointsGeometry.dispose();
-      }
-    };
-  }, [dotTexture, pointsGeometry]);
-
-  const currentPos = useRef<{ x: number; y: number; scale: number }>({
-    x: target.current.x,
-    y: target.current.y,
-    scale: target.current.scale,
-  });
-  const prevDampedPos = useRef<{ x: number; y: number }>({
-    x: target.current.x,
-    y: target.current.y,
-  });
-
-  // Initial heading points along initial path vector towards the right-bottom (~27.7 deg)
-  const targetAngle = useRef<number>(27.7);
-  const currentAngle = useRef<number>(27.7);
-  const prevAngle = useRef<number>(27.7);
-  const bankAngle = useRef<number>(0);
-  const currentRotation = useRef({ rotX: target.current.rotX, rotY: target.current.rotY, rotZ: target.current.rotZ });
-  const currentQuaternion = useRef(new THREE.Quaternion());
-  const targetQuaternion = useRef(new THREE.Quaternion());
-  const pointerTarget = useRef(new THREE.Vector2(10, 10));
-  // DEBUG: remove before merge
-  const renderDebugRef = useRef({ loggedMount: false, lastBucket: -1 });
-  useEffect(() => {
-    const updatePointer = (clientX: number, clientY: number) => {
-      pointerTarget.current.set(
-        (clientX / window.innerWidth) * 2 - 1,
-        1 - (clientY / window.innerHeight) * 2,
-      );
-    };
-    const handleMouseMove = (event: MouseEvent) => updatePointer(event.clientX, event.clientY);
-    const handleTouchMove = (event: TouchEvent) => {
-      const touch = event.touches[0];
-      if (touch) updatePointer(touch.clientX, touch.clientY);
-    };
-    const handleTouchStart = (event: TouchEvent) => {
-      const touch = event.touches[0];
-      if (touch) updatePointer(touch.clientX, touch.clientY);
-    };
-    const handleTouchEnd = () => pointerTarget.current.set(10, 10);
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd, { passive: true });
-    window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
-      window.removeEventListener("touchcancel", handleTouchEnd);
-    };
-  }, []);
-  const shaderUniforms = useMemo(() => ({
+  const uniforms = useMemo(() => ({
     u_time: { value: 0 },
     u_transition: { value: 0 },
     u_mouse: { value: new THREE.Vector3(10, 10, 10) },
-    u_map: { value: dotTexture },
-  }), [dotTexture]);
+    u_map: { value: texture },
+  }), [texture]);
+
+  useEffect(() => {
+    const update = (x: number, y: number) => pointer.current.set((x / window.innerWidth) * 2 - 1, 1 - (y / window.innerHeight) * 2);
+    const move = (event: MouseEvent) => update(event.clientX, event.clientY);
+    const touch = (event: TouchEvent) => { const item = event.touches[0]; if (item) update(item.clientX, item.clientY); };
+    const clear = () => pointer.current.set(10, 10);
+    window.addEventListener("mousemove", move, { passive: true });
+    window.addEventListener("touchstart", touch, { passive: true });
+    window.addEventListener("touchmove", touch, { passive: true });
+    window.addEventListener("touchend", clear, { passive: true });
+    window.addEventListener("touchcancel", clear, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("touchstart", touch);
+      window.removeEventListener("touchmove", touch);
+      window.removeEventListener("touchend", clear);
+      window.removeEventListener("touchcancel", clear);
+    };
+  }, []);
+
+  useEffect(() => () => { texture.dispose(); geometry?.dispose(); }, [texture, geometry]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1);
-    const t = state.clock.elapsedTime;
-    const c = currentPos.current;
-    const tgt = target.current;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const next = target.current;
+    const active = current.current;
+    const damp = (value: number, destination: number) => THREE.MathUtils.damp(value, destination, 5, dt);
+    active.x = damp(active.x, next.x);
+    active.y = damp(active.y, next.y);
+    active.scale = damp(active.scale, next.scale);
+    active.rotX = damp(active.rotX, next.rotX);
+    active.rotY = damp(active.rotY, next.rotY);
+    active.rotZ = damp(active.rotZ, next.rotZ);
 
-    // Respect prefers-reduced-motion: show a static, correctly-oriented pose
-    const prefersReducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (prefersReducedMotion) {
-      if (positionGroup.current) {
-        positionGroup.current.position.set(tgt.x, tgt.y, 0);
-        positionGroup.current.scale.setScalar(tgt.scale);
-      }
-      if (rotationGroup.current) {
-        const rad = (27.7 * Math.PI) / 180;
-        const f = new THREE.Vector3(Math.cos(rad), -Math.sin(rad), 0).normalize();
-        const zWorld = f.clone().negate();
-        const desiredUp = new THREE.Vector3(0, 0.22, 0.97).normalize();
-        const r = new THREE.Vector3().crossVectors(desiredUp, zWorld).normalize();
-        const u = new THREE.Vector3().crossVectors(zWorld, r).normalize();
-        const m = new THREE.Matrix4().makeBasis(r, u, zWorld);
-        rotationGroup.current.quaternion.setFromRotationMatrix(m);
-      }
-      if (pointsRef.current) {
-        const mat = pointsRef.current.material as THREE.PointsMaterial;
-        mat.opacity = mode === "particles" ? 0.95 : 0;
-      }
-      if (solidsRef.current) {
-        solidsRef.current.children.forEach((child) => {
-          const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
-          if (mat) mat.opacity = mode === "solid" ? 1 : 0.03;
-        });
-      }
-      return;
+    if (root.current) {
+      root.current.position.set(active.x, active.y, 0);
+      root.current.scale.setScalar(active.scale);
+    }
+    if (orientation.current) {
+      // One stable quaternion target per frame. No movement-derived Euler angles or wraparound math.
+      targetQuaternion.current.setFromEuler(new THREE.Euler(active.rotX, active.rotY, active.rotZ, "XYZ"));
+      currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
+      orientation.current.quaternion.copy(currentQuaternion.current);
     }
 
-    // DEBUG: remove before merge
-    if (pointsRef.current && !renderDebugRef.current.loggedMount) {
-      const renderer = state.gl;
-      const positionAttribute = pointsRef.current.geometry.getAttribute("position");
-      const sizes = pointsRef.current.geometry.getAttribute("a_size");
-      const sizeValues = sizes.array as Float32Array;
-      const cameraDistance = pointsRef.current.getWorldPosition(new THREE.Vector3()).distanceTo(state.camera.position);
-      const debugRender = {
-        actualPointCount: positionAttribute.count,
-        devicePixelRatio: window.devicePixelRatio,
-        cssResolution: { width: window.innerWidth, height: window.innerHeight },
-        drawingBufferResolution: { width: renderer.domElement.width, height: renderer.domElement.height },
-        camera: { position: state.camera.position.toArray(), fov: (state.camera as THREE.PerspectiveCamera).fov, near: state.camera.near, far: state.camera.far },
-        cameraDistance,
-        pointSizeFormula: "a_size * (300.0 / max(1.0, -mvPosition.z))",
-        representativePointSizes: [0, Math.floor(sizeValues.length / 2), sizeValues.length - 1].map((index) => ({
-          a_size: sizeValues[index],
-          estimatedGlPointSize: sizeValues[index] * (300 / Math.max(1, cameraDistance)),
-        })),
-        shaderTransparency: { additiveBlending: true, depthWrite: false, alphaBase: 0.72, fragmentDiscardBelow: 0.04 },
-      };
-      // DEBUG: remove before merge
-      console.log("[v0] DEBUG particle render mount", debugRender);
-      (window as Window & { __altairParticleRenderDebug?: unknown }).__altairParticleRenderDebug = debugRender;
-      renderDebugRef.current.loggedMount = true;
+    uniforms.u_time.value = state.clock.elapsedTime;
+    uniforms.u_transition.value = THREE.MathUtils.damp(uniforms.u_transition.value, mode === "particles" ? 0 : 1, 3, dt);
+    const mouseX = reduced ? 10 : pointer.current.x;
+    const mouseY = reduced ? 10 : pointer.current.y;
+    uniforms.u_mouse.value.x = THREE.MathUtils.damp(uniforms.u_mouse.value.x, mouseX, 8, dt);
+    uniforms.u_mouse.value.y = THREE.MathUtils.damp(uniforms.u_mouse.value.y, mouseY, 8, dt);
+    uniforms.u_mouse.value.z = 0;
+
+    if (points.current) {
+      const material = points.current.material as THREE.ShaderMaterial;
+      material.opacity = THREE.MathUtils.damp(material.opacity ?? 0.95, mode === "particles" && !reduced ? 0.95 : 0, 6, dt);
     }
-
-    shaderUniforms.u_time.value = t;
-    shaderUniforms.u_transition.value = THREE.MathUtils.damp(
-      shaderUniforms.u_transition.value,
-      mode === "particles" ? 0 : 1,
-      2.8,
-      dt,
-    );
-    const pointerX = prefersReducedMotion ? 10 : pointerTarget.current.x;
-    const pointerY = prefersReducedMotion ? 10 : pointerTarget.current.y;
-    shaderUniforms.u_mouse.value.x = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.x, pointerX, 8, dt);
-    shaderUniforms.u_mouse.value.y = THREE.MathUtils.damp(shaderUniforms.u_mouse.value.y, pointerY, 8, dt);
-    shaderUniforms.u_mouse.value.z = 0;
-    // Smoothly and slowly damp position towards scroll target
-    c.x = THREE.MathUtils.damp(c.x, tgt.x, 3.5, dt);
-    c.y = THREE.MathUtils.damp(c.y, tgt.y, 3.5, dt);
-      c.scale = THREE.MathUtils.damp(c.scale, tgt.scale, 3.5, dt);
-    currentRotation.current.rotX = THREE.MathUtils.damp(currentRotation.current.rotX, tgt.rotX, 3.5, dt);
-    currentRotation.current.rotY = THREE.MathUtils.damp(currentRotation.current.rotY, tgt.rotY, 3.5, dt);
-    currentRotation.current.rotZ = THREE.MathUtils.damp(currentRotation.current.rotZ, tgt.rotZ, 3.5, dt);
-
-    // 1. Compute real per-frame movement vector in screen coordinates (down = positive Y)
-    const screenDx = c.x - prevDampedPos.current.x;
-    const screenDy = -(c.y - prevDampedPos.current.y);
-
-    prevDampedPos.current.x = c.x;
-    prevDampedPos.current.y = c.y;
-
-    const speed = Math.hypot(screenDx, screenDy);
-
-    // Base offset: 0 because nose lines up with angle 0 (towards right) in screen coordinates
-    const baseOffset = 0;
-
-    if (Math.abs(tgt.rotZ) > 0.0001 || speed > 0.0003) {
-      targetAngle.current = Math.abs(tgt.rotZ) > 0.0001
-        ? normalizeAngle((tgt.rotZ * 180) / Math.PI)
-        : normalizeAngle(Math.atan2(screenDy, screenDx) * (180 / Math.PI) + baseOffset);
-    }
-
-    // 3. Interpolate angles by shortest path smoothly
-    const turnResponse = speed > 0.008 ? 8 : 4.5;
-    const lerpFactor = Math.min(1, dt * turnResponse);
-    const nextAngle =
-      currentAngle.current + shortAngleDist(currentAngle.current, targetAngle.current) * lerpFactor;
-
-    // 4. Normalize every stored/output angle into [-180, 180] after each update
-    currentAngle.current = normalizeAngle(nextAngle);
-
-    // Subtle natural banking into turns
-    const da = shortAngleDist(prevAngle.current, currentAngle.current);
-    prevAngle.current = currentAngle.current;
-    const targetBank = THREE.MathUtils.clamp(-da * 0.07, -0.28, 0.28);
-    bankAngle.current = THREE.MathUtils.damp(bankAngle.current, targetBank, 5, dt);
-
-    // 5. Apply position on positionGroup and rotation on rotationGroup separately
-    if (positionGroup.current) {
-      const float = Math.sin(t * 0.8) * 0.035;
-      positionGroup.current.position.set(c.x, c.y + float, 0);
-      positionGroup.current.scale.setScalar(c.scale);
-    }
-
-    if (rotationGroup.current) {
-      const rad = (currentAngle.current * Math.PI) / 180;
-      // Nose heading in Three.js world coordinates (Z = 0 plane)
-      const fx = Math.cos(rad);
-      const fy = -Math.sin(rad); // screen down is Three.js negative Y
-      const f = new THREE.Vector3(fx, fy, 0).normalize();
-
-      // In glider.glb, Nose is -Z, Tail is +Z, Right Wing is +X, Canopy is +Y.
-      // Therefore, to point the nose in direction f, the local +Z axis must point in -f:
-      const zWorld = f.clone().negate();
-
-      // Desired up vector: tilted slightly towards camera (+Z) and world up (+Y)
-      // This ensures the top canopy/wings are always gracefully visible from the camera
-      const desiredUp = new THREE.Vector3(0, 0.22, 0.97).normalize();
-
-      // Right wing vector (local +X)
-      const r = new THREE.Vector3().crossVectors(desiredUp, zWorld).normalize();
-
-      // Apply banking around the forward flight axis
-      if (Math.abs(bankAngle.current) > 0.001) {
-        r.applyAxisAngle(f, bankAngle.current);
-      }
-
-      // Orthogonal up vector (local +Y canopy axis)
-      const u = new THREE.Vector3().crossVectors(zWorld, r).normalize();
-
-      // Construct orthonormal basis: Column 0 = r (+X), Column 1 = u (+Y), Column 2 = zWorld (+Z)
-      const m = new THREE.Matrix4().makeBasis(r, u, zWorld);
-      targetQuaternion.current.setFromRotationMatrix(m);
-      const correctiveRotation = new THREE.Quaternion().setFromEuler(
-        new THREE.Euler(
-          currentRotation.current.rotX,
-          currentRotation.current.rotY,
-          0,
-          "XYZ",
-        ),
-      );
-      targetQuaternion.current.multiply(correctiveRotation);
-      currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-8 * dt));
-      rotationGroup.current.quaternion.copy(currentQuaternion.current);
-    }
-
-    if (pointsRef.current) {
-      const mat = pointsRef.current.material as THREE.PointsMaterial;
-      mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "particles" ? 0.95 : 0, 6, dt);
-    }
-
-    if (solidsRef.current) {
-      solidsRef.current.children.forEach((child) => {
-        const mat = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
-        if (mat) {
-          mat.opacity = THREE.MathUtils.damp(mat.opacity, mode === "solid" ? 1 : 0.03, 6, dt);
-        }
-      });
-    }
+    if (solids.current) solids.current.children.forEach((child) => {
+      const material = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
+      material.opacity = THREE.MathUtils.damp(material.opacity, mode === "solid" ? 1 : 0.03, 6, dt);
+    });
   });
 
   return (
-    <group ref={positionGroup}>
-      <group>
-        <group ref={rotationGroup}>
-        {pointsGeometry ? (
-          <points ref={pointsRef} geometry={pointsGeometry} frustumCulled={false}>
-            <shaderMaterial
-              uniforms={shaderUniforms}
-              vertexShader={particleVertexShader}
-              fragmentShader={particleFragmentShader}
-              vertexColors
-              transparent
-              depthWrite={false}
-              blending={THREE.AdditiveBlending}
-            />
+    <group ref={root}>
+      <group ref={orientation}>
+        {geometry && (
+          <points ref={points} geometry={geometry} frustumCulled={false}>
+            <shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} vertexColors transparent depthWrite={false} blending={THREE.AdditiveBlending} />
           </points>
-        ) : null}
+        )}
         <group position={normalization.position} rotation={normalization.rotation} scale={normalization.scale}>
-          <group ref={solidsRef}>
-            {geometries.map((geometry, i) => (
-              <mesh key={i} geometry={geometry}>
-                <meshStandardMaterial
-                  color="#d7e0f0"
-                  metalness={0.85}
-                  roughness={0.25}
-                  emissive="#1e3a8a"
-                  emissiveIntensity={0.2}
-                  transparent
-                  opacity={0.03}
-                />
+          <group ref={solids}>
+            {meshes.map((mesh, index) => (
+              <mesh key={index} geometry={mesh.geometry}>
+                <meshStandardMaterial color="#d7e0f0" metalness={0.85} roughness={0.25} emissive="#1e3a8a" emissiveIntensity={0.2} transparent opacity={0.03} />
               </mesh>
             ))}
           </group>
-        </group>
         </group>
       </group>
     </group>
   );
 }
 
-export default function GliderParticles({
-  url = LOCAL_GLIDER_URL,
-  target,
-  mode,
-}: {
-  url?: string;
-  target: React.RefObject<GliderTarget>;
-  mode: VisualMode;
-}) {
-  return (
-    <>
-      <GliderRig url={url} target={target as React.MutableRefObject<GliderTarget>} mode={mode} />
-      <Preload all />
-    </>
-  );
+export default function GliderParticles({ url = LOCAL_GLIDER_URL, target, mode }: { url?: string; target: React.RefObject<GliderTarget>; mode: VisualMode }) {
+  return <><GliderRig url={url} target={target as React.MutableRefObject<GliderTarget>} mode={mode} /><Preload all /></>;
 }
+
+export { GliderRig };

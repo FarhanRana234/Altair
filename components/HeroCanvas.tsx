@@ -217,7 +217,10 @@ export default function HeroCanvas() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[6] will-change-transform">
+    <div
+      className="altair-hero-canvas pointer-events-none fixed inset-0 -z-10 will-change-transform"
+      style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh" }}
+    >
       <CanvasErrorBoundary fallback={null}>
         <Canvas
           frameloop="always"
@@ -229,8 +232,12 @@ export default function HeroCanvas() {
           }}
           dpr={[1, 1.5]}
           camera={{ position: [0, 0, 10], fov: 38, near: 0.01, far: 100 }}
-          style={{ pointerEvents: "auto" }}
-          onCreated={({ gl }) => {
+          style={{ width: "100%", height: "100%", display: "block", pointerEvents: "auto" }}
+          onCreated={({ gl, size }) => {
+            gl.domElement.style.width = "100vw";
+            gl.domElement.style.height = "100vh";
+            gl.domElement.style.display = "block";
+            gl.setSize(window.innerWidth, window.innerHeight, false);
             const handleContextLost = (e: Event) => {
               // Crucial: preventDefault allows WebGL context restoration instead of permanent block
               e.preventDefault();
