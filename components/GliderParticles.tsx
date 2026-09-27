@@ -196,6 +196,7 @@ function GliderRig({ url, target, mode }: Props) {
   const currentQuaternion = useRef(new THREE.Quaternion());
   const targetQuaternion = useRef(new THREE.Quaternion());
   const headingQuaternion = useRef(new THREE.Quaternion());
+  const orientationEuler = useRef(new THREE.Euler());
   const pointer = useRef(new THREE.Vector2(10, 10));
   const texture = useMemo(() => dotTexture(), []);
   const meshes = useMemo(() => getMeshes(scene), [scene]);
@@ -285,9 +286,10 @@ function GliderRig({ url, target, mode }: Props) {
       root.current.scale.setScalar(active.scale);
     }
     if (orientation.current) {
-      // Keep the model face-on and rotate only around the camera-facing Z axis.
-      // This preserves the sampled silhouette while aligning its nose to the path.
-      headingQuaternion.current.setFromAxisAngle(new THREE.Vector3(0, 0, 1), active.rotZ);
+      // The source model's nose points opposite the screen-space tangent, so
+      // rotate it by half a turn. A small fixed bank keeps both wings legible.
+      orientationEuler.current.set(0.1, -0.08, active.rotZ + Math.PI, "XYZ");
+      headingQuaternion.current.setFromEuler(orientationEuler.current);
       targetQuaternion.current.copy(headingQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
