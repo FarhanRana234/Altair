@@ -36,8 +36,8 @@ export const FLIGHT_WAYPOINTS: RelativeWaypoint[] = [
   { xPct: 0.58, yPct: 0.14, scale: 0.96, rotX: -0.04, rotY: 0.12, rotZ: 0.2, duration: 0.36 },
   // 3. Cross left in an S-curve
   { xPct: -0.55, yPct: -0.46, scale: 0.92, rotX: 0.1, rotY: -0.16, rotZ: -0.24, duration: 0.36 },
-  // 4. Pitch down into the apply/footer area
-  { xPct: 0.0, yPct: -0.80, scale: 0.88, rotX: -0.28, rotY: 0.18, rotZ: 0.12, duration: 0.28 },
+  // 4. Pitch down toward the footer logo
+  { xPct: 0.56, yPct: -0.72, scale: 0.88, rotX: -0.28, rotY: 0.18, rotZ: -0.28, duration: 0.28 },
 ];
 
 export function getViewportBounds() {
@@ -233,7 +233,7 @@ export default function HeroCanvas() {
           dpr={[1, 1.5]}
           camera={{ position: [0, 0, 10], fov: 38, near: 0.01, far: 100 }}
           style={{ width: "100%", height: "100%", display: "block", pointerEvents: "auto" }}
-          onCreated={({ gl, size }) => {
+          onCreated={({ gl }) => {
             gl.domElement.style.width = "100vw";
             gl.domElement.style.height = "100vh";
             gl.domElement.style.display = "block";
