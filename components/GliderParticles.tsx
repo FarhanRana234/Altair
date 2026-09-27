@@ -56,10 +56,14 @@ const particleVertexShader = `
 
   void main() {
     vec3 base = mix(position, a_target, smoothstep(0.0, 1.0, u_transition));
-    vec3 delta = base - u_mouse;
-    float distanceToPointer = length(delta);
-    float influence = exp(-distanceToPointer * distanceToPointer * 7.0);
-    vec3 displaced = base + normalize(delta + vec3(0.0001)) * influence * 0.11;
+    vec4 baseView = modelViewMatrix * vec4(base, 1.0);
+    vec4 baseClip = projectionMatrix * baseView;
+    vec2 baseNdc = baseClip.xy / max(abs(baseClip.w), 0.0001);
+    vec2 pointerDelta = baseNdc - u_mouse.xy;
+    float distanceToPointer = length(pointerDelta);
+    float influence = exp(-distanceToPointer * distanceToPointer * 18.0);
+    vec3 localForce = normalize(vec3(pointerDelta.x, pointerDelta.y, 0.0) + vec3(0.0001));
+    vec3 displaced = base + localForce * influence * 0.13;
     displaced += vec3(0.0, sin(u_time * 0.55 + position.x * 8.0) * 0.004, 0.0);
     vec4 mvPosition = modelViewMatrix * vec4(displaced, 1.0);
     gl_Position = projectionMatrix * mvPosition;
@@ -306,6 +310,8 @@ function GliderRig({ url, target, mode }: RigProps) {
   const prevAngle = useRef<number>(27.7);
   const bankAngle = useRef<number>(0);
   const currentRotation = useRef({ rotX: target.current.rotX, rotY: target.current.rotY, rotZ: target.current.rotZ });
+  const currentQuaternion = useRef(new THREE.Quaternion());
+  const targetQuaternion = useRef(new THREE.Quaternion());
   const currentPointerX = useRef(0);
   const shaderUniforms = useMemo(() => ({
     u_time: { value: 0 },
@@ -449,10 +455,18 @@ function GliderRig({ url, target, mode }: RigProps) {
 
       // Construct orthonormal basis: Column 0 = r (+X), Column 1 = u (+Y), Column 2 = zWorld (+Z)
       const m = new THREE.Matrix4().makeBasis(r, u, zWorld);
-      rotationGroup.current.quaternion.setFromRotationMatrix(m);
-      rotationGroup.current.rotateX(currentRotation.current.rotX);
-      rotationGroup.current.rotateY(currentRotation.current.rotY);
-      rotationGroup.current.rotateZ(currentRotation.current.rotZ);
+      targetQuaternion.current.setFromRotationMatrix(m);
+      const correctiveRotation = new THREE.Quaternion().setFromEuler(
+        new THREE.Euler(
+          currentRotation.current.rotX,
+          currentRotation.current.rotY,
+          currentRotation.current.rotZ,
+          "XYZ",
+        ),
+      );
+      targetQuaternion.current.multiply(correctiveRotation);
+      currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-8 * dt));
+      rotationGroup.current.quaternion.copy(currentQuaternion.current);
     }
 
     if (pointsRef.current) {

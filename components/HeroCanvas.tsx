@@ -209,6 +209,7 @@ export default function HeroCanvas() {
           }}
           dpr={[1, 1.5]}
           camera={{ position: [0, 0, 10], fov: 38, near: 0.01, far: 100 }}
+          style={{ pointerEvents: "auto" }}
           onCreated={({ gl }) => {
             const handleContextLost = (e: Event) => {
               // Crucial: preventDefault allows WebGL context restoration instead of permanent block
