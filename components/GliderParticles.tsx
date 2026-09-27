@@ -23,7 +23,7 @@ export type GliderTarget = {
 
 useGLTF.preload(LOCAL_GLIDER_URL);
 
-// Keep the finalized desktop/mobile density unchanged.
+// Keep the mobile silhouette light while giving desktop enough points for a clear nose and wings.
 const PARTICLE_COUNT = 18000;
 
 const vertexShader = `
@@ -208,24 +208,27 @@ function GliderRig({ url, target, mode }: Props) {
 
   const geometry = useMemo(() => {
     if (!meshes.length) return null;
-    const positions = new Float32Array(PARTICLE_COUNT * 3);
+    const particleCount = typeof window !== "undefined" && window.innerWidth >= 1024
+      ? 30000
+      : PARTICLE_COUNT;
+    const positions = new Float32Array(particleCount * 3);
     const data = meshes.map((mesh) => ({ geometry: mesh.geometry, area: areaData(mesh.geometry).area }));
     const totalArea = data.reduce((sum, item) => sum + item.area, 0);
     let offset = 0;
     data.forEach((item, index) => {
       const amount = index === data.length - 1
-        ? PARTICLE_COUNT - offset
-        : Math.max(1, Math.round((item.area / totalArea) * PARTICLE_COUNT));
+        ? particleCount - offset
+        : Math.max(1, Math.round((item.area / totalArea) * particleCount));
       offset = sample(item.geometry, amount, positions, offset);
     });
     const vector = new THREE.Vector3();
-    for (let i = 0; i < PARTICLE_COUNT; i += 1) {
+    for (let i = 0; i < particleCount; i += 1) {
       vector.fromArray(positions, i * 3).applyMatrix4(normalization.matrix).toArray(positions, i * 3);
     }
-    const targets = new Float32Array(PARTICLE_COUNT * 3);
-    const sizes = new Float32Array(PARTICLE_COUNT);
-    for (let i = 0; i < PARTICLE_COUNT; i += 1) {
-      const angle = (i / PARTICLE_COUNT) * Math.PI * 2;
+    const targets = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+    for (let i = 0; i < particleCount; i += 1) {
+      const angle = (i / particleCount) * Math.PI * 2;
       const radius = 0.62 + (i % 17) * 0.006;
       targets[i * 3] = Math.cos(angle) * radius;
       targets[i * 3 + 1] = Math.sin(angle) * radius * 0.42;
@@ -286,9 +289,10 @@ function GliderRig({ url, target, mode }: Props) {
       root.current.scale.setScalar(active.scale);
     }
     if (orientation.current) {
-      // The source model's nose points opposite the screen-space tangent, so
-      // rotate it by half a turn. A small fixed bank keeps both wings legible.
-      orientationEuler.current.set(0.1, -0.08, active.rotZ + Math.PI, "XYZ");
+      // Align the model nose with the path tangent and keep a restrained bank
+      // so the wings remain readable as a 3D form instead of pointing upward.
+      // The sampled glider's nose is authored along local +Y.
+      orientationEuler.current.set(0.28, -0.34, active.rotZ - Math.PI / 2, "XYZ");
       headingQuaternion.current.setFromEuler(orientationEuler.current);
       targetQuaternion.current.copy(headingQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));

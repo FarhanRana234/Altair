@@ -132,8 +132,6 @@ export default function HeroCanvas() {
     const progress = { value: 0 };
     const curve = new THREE.CatmullRomCurve3([]);
 
-    const debugProgressRef = { lastBucket: -1 };
-
     const updateFlightPath = () => {
       const bounds = getViewportBounds();
       const points = FLIGHT_WAYPOINTS.map((waypoint) => {
@@ -145,7 +143,8 @@ export default function HeroCanvas() {
       const t = THREE.MathUtils.clamp(progress.value, 0, 1);
       const position = curve.getPointAt(t);
       const tangent = curve.getTangentAt(t).normalize();
-      const tangentAngle = Math.atan2(-tangent.y, tangent.x);
+      // Three.js screen-space rotation maps local +X to the path tangent.
+      const tangentAngle = Math.atan2(tangent.y, tangent.x);
       const scale = THREE.MathUtils.lerp(0.95, 0.82, t);
 
       target.current.x = position.x;
@@ -157,23 +156,6 @@ export default function HeroCanvas() {
       target.current.rotY = 0;
       target.current.rotZ = tangentAngle;
 
-      // DEBUG: remove before merge
-      const bucket = Math.round(t * 20);
-      if (bucket !== debugProgressRef.lastBucket) {
-        debugProgressRef.lastBucket = bucket;
-        const cameraZ = 10;
-        const verticalHalfExtent = Math.tan((38 / 2) * (Math.PI / 180)) * cameraZ;
-        const horizontalHalfExtent = verticalHalfExtent * (window.innerWidth / Math.max(1, window.innerHeight));
-        const margin = 0.4;
-        console.log("[v0] DEBUG flight visibility", {
-          progress: t,
-          worldPosition: { x: position.x, y: position.y, z: 0 },
-          camera: { position: [0, 0, cameraZ], fov: 38, near: 0.01, far: 100 },
-          estimatedFrustumAtZ0: { left: -horizontalHalfExtent, right: horizontalHalfExtent, bottom: -verticalHalfExtent, top: verticalHalfExtent },
-          estimatedOnScreenWithMargin: Math.abs(position.x) <= horizontalHalfExtent - margin && Math.abs(position.y) <= verticalHalfExtent - margin,
-          scale: target.current.scale,
-        });
-      }
     };
 
     const buildTimeline = () => {
