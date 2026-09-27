@@ -43,7 +43,7 @@ export function normalizeAngle(a: number): number {
 
 useGLTF.preload(LOCAL_GLIDER_URL);
 
-const PARTICLE_COUNT = 9000;
+const PARTICLE_COUNT = 18000;
 
 const particleVertexShader = `
   attribute vec3 a_target;
@@ -287,7 +287,7 @@ function GliderRig({ url, target, mode }: RigProps) {
       targets[i * 3 + 2] = Math.sin(angle * 3.0) * 0.035;
     }
     const sizes = new Float32Array(PARTICLE_COUNT);
-    for (let i = 0; i < PARTICLE_COUNT; i += 1) sizes[i] = 0.012 + Math.random() * 0.018;
+    for (let i = 0; i < PARTICLE_COUNT; i += 1) sizes[i] = 0.04 + Math.random() * 0.025;
     const buffer = new THREE.BufferGeometry();
     buffer.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     buffer.setAttribute("color", new THREE.BufferAttribute(colors, 3));
