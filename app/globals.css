@@ -29,10 +29,12 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--color-navy-bg);
+  background: var(--color-navy-bg);
 }
 
 body {
+  background:
+    linear-gradient(45deg, #264a7c 0%, #112f5d 28%, #081f46 58%, #04132e 100%) fixed;
   background-color: var(--color-navy-bg);
   color: var(--color-white);
   overflow-x: hidden;

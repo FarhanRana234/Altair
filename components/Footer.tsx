@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Instagram, Linkedin, Mail, Phone } from "lucide-react";
 import OrganizedByCard from "./OrganizedByCard";
@@ -93,25 +92,39 @@ export default function Footer() {
         <div className="mt-20">
           <OrganizedByCard />
         </div>
+
+        <div className="mt-10 text-center">
+          <a
+            href="https://www.instagram.com/pixify_web"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex flex-col items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-[#7DA7D9] transition-colors hover:text-white"
+          >
+            <img
+              src="/assets/pixify-web-logo.jpg"
+              alt="Pixify Web"
+              width={96}
+              height={96}
+              className="size-16 rounded-xl object-cover shadow-lg shadow-[#071834]/40"
+            />
+            <span className="inline-flex items-center gap-2">
+              <Instagram className="h-4 w-4" />
+              Made by @pixify_web
+            </span>
+          </a>
+        </div>
       </div>
 
       {/* Bottom Footer Bar with Tagline */}
       <div className="border-t border-[#446391]/20 bg-[#071834]/80">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row text-center sm:text-left">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/brand/crane-icon.svg"
-              alt="Altair crane logo"
-              width={36}
-              height={36}
-              className="h-8 w-8 object-contain drop-shadow-[0_0_12px_rgba(125,167,217,0.35)]"
-            />
-            <Image
-              src="/brand/wordmark.svg"
+          <div className="flex items-center">
+            <img
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot_20260927-121040-7LkxshNfTORsVLqSgfhV5oXCV2U0Vc.png"
               alt="altair"
-              width={85}
-              height={22}
-              className="h-4 sm:h-5 w-auto object-contain"
+              width={224}
+              height={94}
+              className="h-8 w-auto object-contain sm:h-10"
             />
           </div>
 
