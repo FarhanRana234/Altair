@@ -290,14 +290,14 @@ function GliderRig({ url, target, mode }: Props) {
       root.current.scale.setScalar(active.scale);
     }
     if (orientation.current) {
-      // The sampled model's nose is local +Y. Align it with the path tangent
-      // so the aircraft keeps its nose pointed along the direction of travel,
-      // including the downward middle section, without an extra quarter-turn.
-      flightDirection.set(Math.cos(active.rotZ), Math.sin(active.rotZ), 0).normalize();
+      // The sampled model's nose is local +Y. Align that axis directly to the
+      // screen-space travel tangent, then bank around the nose so the wings
+      // keep a visible 3D angle without ever inverting the aircraft.
+      flightDirection.set(Math.cos(active.rotZ + Math.PI / 2), Math.sin(active.rotZ + Math.PI / 2), 0).normalize();
       headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
-      // Keep the aircraft upright while banking slightly so its nose follows
-      // the travel direction instead of presenting the tail.
-      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.24);
+      // The source mesh is authored inverted around its forward axis; this
+      // half-turn puts the tail fin above the fuselage, with a slight bank.
+      bankQuaternion.current.setFromAxisAngle(forwardAxis, Math.PI + 0.24);
       targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
