@@ -98,10 +98,19 @@ export default function Footer() {
             href="https://www.instagram.com/pixify_web"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.22em] text-[#7DA7D9] transition-colors hover:text-white"
+            className="inline-flex flex-col items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-[#7DA7D9] transition-colors hover:text-white"
           >
-            <Instagram className="h-4 w-4" />
-            Made by @pixify_web
+            <img
+              src="/assets/pixify-web-logo.jpg"
+              alt="Pixify Web"
+              width={96}
+              height={96}
+              className="size-16 rounded-xl object-cover shadow-lg shadow-[#071834]/40"
+            />
+            <span className="inline-flex items-center gap-2">
+              <Instagram className="h-4 w-4" />
+              Made by @pixify_web
+            </span>
           </a>
         </div>
       </div>
