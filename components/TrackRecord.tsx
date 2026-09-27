@@ -44,17 +44,13 @@ function formatNumber(raw: string): number {
 
 function Counter({ metric }: { metric: Metric }) {
   const ref = useRef<HTMLSpanElement>(null);
-
-  if (metric.display) {
-    return <span ref={ref}>{metric.display}</span>;
-  }
   const inView = useInView(ref, { once: true, amount: 0.5 });
   const [text, setText] = useState(
     `${metric.prefix ?? ""}${metric.decimals ? "0.0" : "0"}`
   );
 
   useEffect(() => {
-    if (!inView) return;
+    if (metric.display || !inView) return;
     const target = formatNumber(metric.value);
     const duration = 1800;
     const start = performance.now();
