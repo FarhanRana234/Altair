@@ -193,14 +193,6 @@ function GliderRig({ url, target, mode }: Props) {
   const points = useRef<THREE.Points>(null);
   const solids = useRef<THREE.Group>(null);
   const current = useRef({ ...target.current });
-  const currentQuaternion = useRef(new THREE.Quaternion());
-  const targetQuaternion = useRef(new THREE.Quaternion());
-  const headingQuaternion = useRef(new THREE.Quaternion());
-  const bankQuaternion = useRef(new THREE.Quaternion());
-  // The imported glider points along local -Y; using the actual nose axis prevents
-  // the model from appearing to reverse or flip while it follows the path.
-  const forwardAxis = useMemo(() => new THREE.Vector3(0, -1, 0), []);
-  const flightDirection = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2(10, 10));
   const texture = useMemo(() => dotTexture(), []);
   const meshes = useMemo(() => getMeshes(scene), [scene]);
@@ -292,17 +284,10 @@ function GliderRig({ url, target, mode }: Props) {
       root.current.scale.setScalar(active.scale);
     }
     if (orientation.current) {
-      // The imported mesh nose is local -Y. The scroll controller supplies
-      // the continuous path angle, so this maps the nose to the tangent without
-      // any π flips when the path turns through the vertical.
-      flightDirection.set(Math.cos(active.rotZ + Math.PI / 2), Math.sin(active.rotZ + Math.PI / 2), 0).normalize();
-      headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
-      // Keep the aircraft upright through the middle of the flight path;
-      // only apply a small bank so the nose never rolls onto its back.
-      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.08);
-      targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
-      currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
-      orientation.current.quaternion.copy(currentQuaternion.current);
+      // Keep rotation entirely in screen space. Applying the path angle as a
+      // single Z rotation removes quaternion roll ambiguity at the final turn,
+      // so the glider stays upright while its nose follows the tangent.
+      orientation.current.rotation.set(0, 0, active.rotZ);
     }
 
     uniforms.u_time.value = state.clock.elapsedTime;
