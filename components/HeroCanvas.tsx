@@ -36,8 +36,8 @@ export const FLIGHT_WAYPOINTS: RelativeWaypoint[] = [
   { xPct: 0.58, yPct: 0.14, scale: 0.96, rotX: -0.04, rotY: 0.12, rotZ: 0.2, duration: 0.36 },
   // 3. Cross left in an S-curve
   { xPct: -0.55, yPct: -0.46, scale: 0.92, rotX: 0.1, rotY: -0.16, rotZ: -0.24, duration: 0.36 },
-  // 4. Pitch down toward the footer logo
-  { xPct: 0.56, yPct: -0.72, scale: 0.88, rotX: -0.28, rotY: 0.18, rotZ: -0.28, duration: 0.28 },
+  // 4. Drop straight down toward the footer; no sweeping final turn
+  { xPct: -0.55, yPct: -0.72, scale: 0.88, rotX: 0, rotY: 0, rotZ: -Math.PI / 2, duration: 0.28 },
 ];
 
 export function getViewportBounds() {
@@ -152,6 +152,9 @@ export default function HeroCanvas() {
         while (tangentAngle - previousTangentAngle < -Math.PI) tangentAngle += Math.PI * 2;
       }
       previousTangentAngle = tangentAngle;
+      // Once the glider reaches the final section, hold a true vertical dive
+      // instead of interpolating through a roll-inducing curved turn.
+      if (t > 0.72) tangentAngle = -Math.PI / 2;
       const scale = THREE.MathUtils.lerp(1.08, 0.94, t);
 
       target.current.x = position.x;
