@@ -17,13 +17,13 @@ const mono = Lekton({
 });
 
 export const metadata: Metadata = {
-  title: "ALTAIR — wingspans beyond the stars.",
+  title: "ALTAIR",
   description:
-    "ALTAIR is a student-led engineering team from NEDUET and CUST designing, building, and racing a next-generation glider for AeroPakistan 2027.",
+    "ALTAIR is a student-led engineering team from NEDUET designing, building, and racing a next-generation glider for AeroPakistan 2027.",
   openGraph: {
-    title: "ALTAIR — wingspans beyond the stars.",
+    title: "ALTAIR",
     description:
-      "ALTAIR is a student-led engineering team from NEDUET and CUST designing, building, and racing a next-generation glider for AeroPakistan 2027.",
+      "ALTAIR is a student-led engineering team from NEDUET designing, building, and racing a next-generation glider for AeroPakistan 2027.",
     type: "website",
     images: [
       {
