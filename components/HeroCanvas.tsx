@@ -146,20 +146,15 @@ export default function HeroCanvas() {
       const position = curve.getPointAt(t);
       const tangent = curve.getTangentAt(t).normalize();
       const tangentAngle = Math.atan2(-tangent.y, tangent.x);
-      const nextT = Math.min(1, t + 0.025);
-      const nextTangent = curve.getTangentAt(nextT).normalize();
-      const curvature = THREE.MathUtils.clamp(
-        (Math.atan2(-nextTangent.y, nextTangent.x) - tangentAngle) * 2.4,
-        -0.32,
-        0.32,
-      );
       const scale = THREE.MathUtils.lerp(0.95, 0.82, t);
 
       target.current.x = position.x;
       target.current.y = position.y;
       target.current.scale = scale * (bounds.isMobile ? 0.36 : 0.52);
-      target.current.rotX = THREE.MathUtils.lerp(0.16, -0.22, t);
-      target.current.rotY = THREE.MathUtils.clamp(curvature * 0.35, -0.14, 0.14);
+      // The particle mesh is authored nose-first along local +Z. Keep it
+      // face-on to the camera and yaw it in screen space along the flight path.
+      target.current.rotX = 0;
+      target.current.rotY = 0;
       target.current.rotZ = tangentAngle;
 
       // DEBUG: remove before merge

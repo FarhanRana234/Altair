@@ -195,6 +195,7 @@ function GliderRig({ url, target, mode }: Props) {
   const current = useRef({ ...target.current });
   const currentQuaternion = useRef(new THREE.Quaternion());
   const targetQuaternion = useRef(new THREE.Quaternion());
+  const headingQuaternion = useRef(new THREE.Quaternion());
   const pointer = useRef(new THREE.Vector2(10, 10));
   const texture = useMemo(() => dotTexture(), []);
   const meshes = useMemo(() => getMeshes(scene), [scene]);
@@ -284,8 +285,10 @@ function GliderRig({ url, target, mode }: Props) {
       root.current.scale.setScalar(active.scale);
     }
     if (orientation.current) {
-      // One stable quaternion target per frame. No movement-derived Euler angles or wraparound math.
-      targetQuaternion.current.setFromEuler(new THREE.Euler(active.rotX, active.rotY, active.rotZ, "XYZ"));
+      // Keep the model face-on and rotate only around the camera-facing Z axis.
+      // This preserves the sampled silhouette while aligning its nose to the path.
+      headingQuaternion.current.setFromAxisAngle(new THREE.Vector3(0, 0, 1), active.rotZ);
+      targetQuaternion.current.copy(headingQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
     }
