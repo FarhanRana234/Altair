@@ -64,7 +64,7 @@ export default function SponsorshipFormModal({ open, onClose }: Props) {
     setStatus("sending");
 
     const payload = {
-      access_key: process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY,
+      access_key: process.env.WEB3FORMS_ACCESS_KEY,
       name: form.name,
       email: form.email,
       company: form.company,

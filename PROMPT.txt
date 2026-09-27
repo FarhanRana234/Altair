@@ -40,7 +40,7 @@ D. Interactive Sponsorship Tier & Budget Explorer (`TierExplorer.tsx`):
 E. Web3Forms Sponsorship Lead Form & Modal (`SponsorshipFormModal.tsx`):
 - Glassmorphic modal popup triggerable from any "Sponsor Us" CTA button.
 - Captures name, email, company, target tier, and custom note.
-- Submits form payload to `https://api.web3forms.com/submit` using `process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY`.
+- Submits form payload to `https://api.web3forms.com/submit` using `process.env.WEB3FORMS_ACCESS_KEY`.
 - On successful API response, triggers automatic browser download for `/ALTAIR_SPONSORSHIP_PROPOSAL.pdf` and shows success notification.
 
 F. Metric Counter Grid (Teach64-Inspired):
