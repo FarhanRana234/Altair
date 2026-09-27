@@ -18,7 +18,7 @@ export default function AeroPakistanIntro() {
           <h2 className="section-heading mb-10 text-center">
           WHAT IS AERO PAKISTAN?
         </h2>
-        <div className="glass-card p-8 sm:p-12 lg:p-14 text-center max-w-4xl border border-[#446391]/30 bg-[#071834]/80">
+        <div className="glass-card p-8 sm:p-12 lg:p-14 text-center max-w-4xl border border-[#446391]/30 bg-[#071834]/58">
           <p className="section-body text-base sm:text-lg leading-relaxed text-slate-200">
             Aero Pakistan is a national-level STEM and education competition
             where student teams design, build, and race scaled-down gliders, and

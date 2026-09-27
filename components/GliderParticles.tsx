@@ -23,8 +23,8 @@ export type GliderTarget = {
 
 useGLTF.preload(LOCAL_GLIDER_URL);
 
-// Keep the mobile silhouette light while giving desktop enough points for a clear nose and wings.
-const PARTICLE_COUNT = 9000;
+// Keep the silhouette airy while using larger particles so the glider reads clearly on every viewport.
+const PARTICLE_COUNT = 8000;
 
 const vertexShader = `
   attribute vec3 a_target;
@@ -193,12 +193,6 @@ function GliderRig({ url, target, mode }: Props) {
   const points = useRef<THREE.Points>(null);
   const solids = useRef<THREE.Group>(null);
   const current = useRef({ ...target.current });
-  const currentQuaternion = useRef(new THREE.Quaternion());
-  const targetQuaternion = useRef(new THREE.Quaternion());
-  const headingQuaternion = useRef(new THREE.Quaternion());
-  const bankQuaternion = useRef(new THREE.Quaternion());
-  const forwardAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
-  const flightDirection = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2(10, 10));
   const texture = useMemo(() => dotTexture(), []);
   const meshes = useMemo(() => getMeshes(scene), [scene]);
@@ -211,7 +205,7 @@ function GliderRig({ url, target, mode }: Props) {
   const geometry = useMemo(() => {
     if (!meshes.length) return null;
     const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
-    const particleCount = isDesktop ? 18000 : PARTICLE_COUNT;
+    const particleCount = isDesktop ? 7000 : PARTICLE_COUNT;
     const positions = new Float32Array(particleCount * 3);
     const data = meshes.map((mesh) => ({ geometry: mesh.geometry, area: areaData(mesh.geometry).area }));
     const totalArea = data.reduce((sum, item) => sum + item.area, 0);
@@ -234,7 +228,7 @@ function GliderRig({ url, target, mode }: Props) {
       targets[i * 3] = Math.cos(angle) * radius;
       targets[i * 3 + 1] = Math.sin(angle) * radius * 0.42;
       targets[i * 3 + 2] = Math.sin(angle * 3) * 0.035;
-      sizes[i] = isDesktop ? 0.045 + Math.random() * 0.03 : 0.04 + Math.random() * 0.025;
+      sizes[i] = isDesktop ? 0.05 + Math.random() * 0.035 : 0.055 + Math.random() * 0.035;
     }
     const result = new THREE.BufferGeometry();
     result.setAttribute("position", new THREE.BufferAttribute(positions, 3));
@@ -290,23 +284,10 @@ function GliderRig({ url, target, mode }: Props) {
       root.current.scale.setScalar(active.scale);
     }
     if (orientation.current) {
-      // The sampled model's nose is local +Y. Align that axis directly to the
-      // screen-space travel tangent, then bank around the nose so the wings
-      // keep a visible 3D angle without ever inverting the aircraft.
-      // Apply the authored screen-facing offset so the initial hero pose reads
-      // as a shallow banked glide rather than standing vertically.
-      // The sampled mesh's nose is opposite the screen-space +Y axis.
-      // Reverse the heading so leftward travel shows the nose pointing right,
-      // matching the intended opening pose and the lower flight direction.
-      const heading = active.rotZ + Math.PI / 2 + Math.PI;
-      flightDirection.set(Math.cos(heading), Math.sin(heading), 0).normalize();
-      headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
-      // Bank only around the nose axis. Do not add a half-turn here: it flips
-      // the underside to the top during the lower part of the flight.
-      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.24);
-      targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
-      currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
-      orientation.current.quaternion.copy(currentQuaternion.current);
+      // Keep rotation entirely in screen space. Applying the path angle as a
+      // single Z rotation removes quaternion roll ambiguity at the final turn,
+      // so the glider stays upright while its nose follows the tangent.
+      orientation.current.rotation.set(0, 0, active.rotZ + Math.PI);
     }
 
     uniforms.u_time.value = state.clock.elapsedTime;

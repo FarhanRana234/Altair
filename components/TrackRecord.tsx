@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 
 type Metric = {
   value: string;
+  display?: string;
   suffix?: string;
   prefix?: string;
   decimals?: number;
@@ -16,16 +17,25 @@ const METRICS: Metric[] = [
   {
     value: "1",
     suffix: "st",
-    label: "Runners-Up",
-    sublabel: "Formula Pakistan 2026",
+    label: "Runners Up",
+    sublabel: "Team: Driftx",
   },
   {
-    value: "185.0",
-    decimals: 1,
-    label: "Top Score",
-    sublabel: "Highest Engineering & Design score nationally",
+    value: "190",
+    suffix: " / 200",
+    label: "Score",
+    sublabel: "Engineering & design score",
   },
-
+  {
+    value: "0",
+    display: "Top 3",
+    label: "Race Performance",
+  },
+  {
+    value: "2",
+    label: "Organized Events",
+    sublabel: "SportsFest with 15 teams and multiple sports · Beach clean-up with AlKhidmat",
+  },
 ];
 
 function formatNumber(raw: string): number {
@@ -40,7 +50,7 @@ function Counter({ metric }: { metric: Metric }) {
   );
 
   useEffect(() => {
-    if (!inView) return;
+    if (metric.display || !inView) return;
     const target = formatNumber(metric.value);
     const duration = 1800;
     const start = performance.now();
@@ -80,14 +90,14 @@ export default function TrackRecord() {
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="mb-14 flex flex-col items-center text-center"
       >
-        <h2 className="section-heading">BUILT ON PROVEN WINGS</h2>
+        <h2 className="section-heading text-6xl text-white sm:text-7xl lg:text-8xl">PROVEN TRACK RECORD</h2>
         <p className="section-body mt-4 max-w-2xl">
-          ALTAIR is the direct successor to Team DriftX — 1st Runners-Up at
-          Formula Pakistan 2026. Our numbers speak for themselves.
+          From podium performance to community impact, our record reflects the
+          engineering, teamwork, and purpose behind Team Altair.
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {METRICS.map((metric, i) => (
           <motion.div
             key={metric.label}
@@ -112,15 +122,6 @@ export default function TrackRecord() {
         ))}
       </div>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.3 }}
-        className="mt-10 text-center text-sm font-light tracking-widest text-slate-400/90"
-      >
-        National media exposure — BBC Urdu · DAWN · ProPakistani
-      </motion.p>
     </section>
   );
 }

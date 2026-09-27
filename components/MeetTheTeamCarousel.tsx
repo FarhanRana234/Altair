@@ -38,14 +38,14 @@ const TEAM_MEMBERS: TeamMember[] = [
   {
     name: "Yamaan Ali",
     role: "Structures and Manufacturing",
-    institution: "CUST",
+    institution: "NEDUET",
     quote: "Baggin that highest engineering score fs",
     image: "/team/yamaan.png",
   },
   {
     name: "Hamna Maryam",
     role: "Project Manager",
-    institution: "NEDUET",
+    institution: "CUST",
     quote: "Stand back, we got this",
     image: "/team/humna.png",
   },
@@ -115,7 +115,7 @@ export default function MeetTheTeamCarousel() {
 
       {/* Swipeable Carousel Card */}
       <div className="relative mx-auto max-w-4xl">
-        <div className="relative min-h-[460px] sm:min-h-[400px] overflow-hidden rounded-3xl border border-[#446391]/35 bg-[#071834]/85 p-6 sm:p-10 lg:p-12 shadow-2xl backdrop-blur-md">
+        <div className="relative min-h-[460px] sm:min-h-[400px] overflow-hidden rounded-3xl border border-[#446391]/35 bg-[#071834]/48 p-6 sm:p-10 lg:p-12 shadow-2xl backdrop-blur-md">
           <AnimatePresence custom={direction} mode="wait">
             <motion.div
               key={currentIndex}
@@ -156,7 +156,7 @@ export default function MeetTheTeamCarousel() {
               </div>
 
               {/* Photo Side - Rounded rectangle matching mockup */}
-              <div className="relative h-60 w-52 sm:h-72 sm:w-60 md:h-80 md:w-68 shrink-0 overflow-hidden rounded-2xl border border-[#446391]/40 bg-[#071834]/90 shadow-lg">
+              <div className="relative h-60 w-52 sm:h-72 sm:w-60 md:h-80 md:w-68 shrink-0 overflow-hidden rounded-2xl border border-[#446391]/40 bg-[#071834]/62 shadow-lg">
                 <Image
                   src={current.image}
                   alt={`${current.name} — ${current.role}`}
