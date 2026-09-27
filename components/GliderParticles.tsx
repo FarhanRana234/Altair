@@ -300,8 +300,8 @@ function GliderRig({ url, target, mode }: RigProps) {
       configuredSampleCount: PARTICLE_COUNT,
       targetCount: buffer.getAttribute("a_target").count,
       sizeRange: {
-        min: Math.min(...sizes),
-        max: Math.max(...sizes),
+        min: sizes.reduce((min, size) => Math.min(min, size), Number.POSITIVE_INFINITY),
+        max: sizes.reduce((max, size) => Math.max(max, size), Number.NEGATIVE_INFINITY),
         average: sizes.reduce((sum, size) => sum + size, 0) / sizes.length,
       },
     };
@@ -418,8 +418,6 @@ function GliderRig({ url, target, mode }: RigProps) {
       }
       return;
     }
-
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
     // DEBUG: remove before merge
     if (pointsRef.current && !renderDebugRef.current.loggedMount) {
