@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 
 type Metric = {
   value: string;
+  display?: string;
   suffix?: string;
   prefix?: string;
   decimals?: number;
@@ -16,16 +17,26 @@ const METRICS: Metric[] = [
   {
     value: "1",
     suffix: "st",
-    label: "Runners-Up",
-    sublabel: "Formula Pakistan 2026",
+    label: "Runners Up",
+    sublabel: "Team: Driftx",
   },
   {
-    value: "185.0",
-    decimals: 1,
-    label: "Top Score",
-    sublabel: "Highest Engineering & Design score nationally",
+    value: "190",
+    suffix: " / 200",
+    label: "Score",
+    sublabel: "Engineering and design score",
   },
-
+  {
+    value: "0",
+    display: "Top 3",
+    label: "Race Performance",
+    sublabel: "Top 3 in race performance",
+  },
+  {
+    value: "2",
+    label: "Organized Events",
+    sublabel: "SportsFest (15 teams, multiple sports) and beach clean-up in collaboration with AlKhidmat",
+  },
 ];
 
 function formatNumber(raw: string): number {
@@ -64,7 +75,7 @@ function Counter({ metric }: { metric: Metric }) {
 
   return (
     <span ref={ref} className="tabular-nums font-display font-normal text-white">
-      {text}
+      {metric.display ?? text}
       {metric.suffix ? <span className="text-[#7DA7D9]">{metric.suffix}</span> : null}
     </span>
   );
@@ -97,12 +108,9 @@ export default function TeamAltairSection() {
         className="mt-14"
       >
         <div className="mb-4 flex items-center justify-between px-2">
-          <span className="font-mono text-xs uppercase tracking-[0.25em] text-[#7DA7D9]">
-            Proven Track Record
-          </span>
-          <span className="font-mono text-xs uppercase tracking-[0.2em] text-[#6484B5]">
-            Formula Pakistan 2026 Lineage
-          </span>
+          <h2 className="font-display text-4xl uppercase tracking-[0.16em] text-white sm:text-5xl">
+            Track Record
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
