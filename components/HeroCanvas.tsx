@@ -128,7 +128,7 @@ export default function HeroCanvas() {
       return;
     }
 
-    let tl: gsap.core.Timeline | null = null;
+    let flightTrigger: ScrollTrigger | null = null;
     const progress = { value: 0 };
     const curve = new THREE.CatmullRomCurve3([]);
 
@@ -177,19 +177,22 @@ export default function HeroCanvas() {
     };
 
     const buildTimeline = () => {
-      tl?.kill();
+      flightTrigger?.kill();
       updateFlightPath();
-      tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: document.documentElement,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1.1,
-          invalidateOnRefresh: true,
+      flightTrigger = ScrollTrigger.create({
+        trigger: document.documentElement,
+        start: "top top",
+        end: "bottom bottom",
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          // Read ScrollTrigger progress directly so reverse scrolling immediately
+          // moves the glider back up the path instead of leaving a scrub tween behind.
+          progress.value = self.progress;
+          updateFlightPath();
         },
-        defaults: { ease: "none" },
       });
-      tl.to(progress, { value: 1, duration: 1, onUpdate: updateFlightPath });
+      progress.value = flightTrigger.progress;
+      updateFlightPath();
       ScrollTrigger.refresh();
     };
 
@@ -201,8 +204,7 @@ export default function HeroCanvas() {
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
-      tl?.kill();
-      ScrollTrigger.getAll().forEach((st) => st.kill());
+      flightTrigger?.kill();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
