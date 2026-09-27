@@ -33,7 +33,7 @@ const MEMBERS: Member[] = [
   {
     name: "Yamaan Ali",
     role: "Structures and Manufacturing",
-    university: "NEDUEST",
+    university: "NEDUET",
     image: "/team/yamaan.png",
   },
   {
