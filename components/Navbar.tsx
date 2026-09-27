@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
@@ -45,21 +44,12 @@ export default function Navbar({ onSponsorClick }: { onSponsorClick: () => void 
             className="flex items-center gap-3 transition-opacity hover:opacity-85"
             aria-label="Altair home"
           >
-            <Image
-              src="/brand/crane-icon.svg"
-              alt="Altair crane logo"
-              width={40}
-              height={40}
-              className="h-9 w-9 sm:h-10 sm:w-10 object-contain drop-shadow-[0_0_12px_rgba(125,167,217,0.35)]"
-              priority
-            />
-            <Image
-              src="/brand/wordmark.svg"
+            <img
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot_20260927-121040-7LkxshNfTORsVLqSgfhV5oXCV2U0Vc.png"
               alt="altair"
-              width={96}
-              height={26}
-              className="h-5 sm:h-6 w-auto object-contain"
-              priority
+              width={224}
+              height={94}
+              className="h-8 w-auto object-contain sm:h-10"
             />
           </a>
         </motion.div>

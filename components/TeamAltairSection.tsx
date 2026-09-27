@@ -130,23 +130,6 @@ export default function TeamAltairSection() {
           ))}
         </div>
 
-        {/* Media Coverage Banner */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.35 }}
-          className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border border-[#446391]/30 bg-[#071834]/60 px-6 py-4 backdrop-blur-sm"
-        >
-          <div className="flex items-center gap-2 font-mono text-xs tracking-wider text-slate-300">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#7DA7D9]" />
-            <span className="text-[#7DA7D9] font-normal">National Media Coverage:</span>
-            <span>BBC Urdu · DAWN · ProPakistani</span>
-          </div>
-          <span className="font-mono text-[11px] uppercase tracking-widest text-[#6484B5]">
-            Top Engineering &amp; Design Score Nationally
-          </span>
-        </motion.div>
       </motion.div>
     </section>
   );

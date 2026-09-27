@@ -149,7 +149,7 @@ export default function HeroCanvas() {
 
       target.current.x = position.x;
       target.current.y = position.y;
-      target.current.scale = scale * (bounds.isMobile ? 0.36 : 0.52);
+      target.current.scale = scale * (bounds.isMobile ? 0.36 : 0.64);
       // The particle mesh is authored nose-first along local +Z. Keep it
       // face-on to the camera and yaw it in screen space along the flight path.
       target.current.rotX = 0;
