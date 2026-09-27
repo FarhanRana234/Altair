@@ -44,7 +44,7 @@ export default function Sponsorship({ onSponsorClick }: { onSponsorClick: () => 
             <a
               href="/ALTAIR_SPONSORSHIP_PROPOSAL.pdf"
               download
-              className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-[#446391]/40 bg-[#071834]/80 px-6 py-3.5 font-mono text-xs font-normal uppercase tracking-widest text-slate-200 transition-all hover:border-[#7DA7D9] hover:text-white"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-[#446391]/40 bg-[#071834]/62 px-6 py-3.5 font-mono text-xs font-normal uppercase tracking-widest text-slate-200 transition-all hover:border-[#7DA7D9] hover:text-white"
             >
               <FileDown className="h-4 w-4" />
               Download Proposal
@@ -57,7 +57,7 @@ export default function Sponsorship({ onSponsorClick }: { onSponsorClick: () => 
               {SDGS.map((sdg) => (
                 <div
                   key={sdg.number}
-                  className="flex items-center gap-3 rounded-xl border border-[#446391]/30 bg-[#071834]/80 px-4 py-3 backdrop-blur-sm"
+                  className="flex items-center gap-3 rounded-xl border border-[#446391]/30 bg-[#071834]/62 px-4 py-3 backdrop-blur-sm"
                 >
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#7DA7D9]/40 bg-[#7DA7D9]/15 font-display text-base font-normal text-[#7DA7D9]">
                     {sdg.number}

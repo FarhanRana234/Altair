@@ -37,7 +37,7 @@ export default function EventsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-            className="glass-card group relative p-8 sm:p-10 border border-[#446391]/35 bg-[#071834]/85 hover:border-[#7DA7D9]/50 transition-colors"
+            className="glass-card group relative p-8 sm:p-10 border border-[#446391]/35 bg-[#071834]/62 hover:border-[#7DA7D9]/50 transition-colors"
           >
             <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[#7DA7D9]/30 bg-[#7DA7D9]/10">
               <Flag className="h-5 w-5 text-[#7DA7D9]" />
@@ -59,7 +59,7 @@ export default function EventsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="glass-card group relative p-8 sm:p-10 border border-[#446391]/35 bg-[#071834]/85 hover:border-[#7DA7D9]/50 transition-colors"
+            className="glass-card group relative p-8 sm:p-10 border border-[#446391]/35 bg-[#071834]/62 hover:border-[#7DA7D9]/50 transition-colors"
           >
             <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl border border-[#7DA7D9]/30 bg-[#7DA7D9]/10">
               <Mic className="h-5 w-5 text-[#7DA7D9]" />

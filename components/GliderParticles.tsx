@@ -24,7 +24,7 @@ export type GliderTarget = {
 useGLTF.preload(LOCAL_GLIDER_URL);
 
 // Keep the silhouette airy while using larger particles so the glider reads clearly on every viewport.
-const PARTICLE_COUNT = 6000;
+const PARTICLE_COUNT = 12000;
 
 const vertexShader = `
   attribute vec3 a_target;
@@ -236,7 +236,7 @@ function GliderRig({ url, target, mode }: Props) {
       targets[i * 3] = Math.cos(angle) * radius;
       targets[i * 3 + 1] = Math.sin(angle) * radius * 0.42;
       targets[i * 3 + 2] = Math.sin(angle * 3) * 0.035;
-      sizes[i] = isDesktop ? 0.045 + Math.random() * 0.03 : 0.04 + Math.random() * 0.025;
+      sizes[i] = isDesktop ? 0.05 + Math.random() * 0.035 : 0.055 + Math.random() * 0.035;
     }
     const result = new THREE.BufferGeometry();
     result.setAttribute("position", new THREE.BufferAttribute(positions, 3));
@@ -299,7 +299,7 @@ function GliderRig({ url, target, mode }: Props) {
       headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
       // Keep the aircraft upright through the middle of the flight path;
       // only apply a small bank so the nose never rolls onto its back.
-      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.24);
+      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.08);
       targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);

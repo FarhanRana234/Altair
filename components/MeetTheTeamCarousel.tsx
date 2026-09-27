@@ -115,7 +115,7 @@ export default function MeetTheTeamCarousel() {
 
       {/* Swipeable Carousel Card */}
       <div className="relative mx-auto max-w-4xl">
-        <div className="relative min-h-[460px] sm:min-h-[400px] overflow-hidden rounded-3xl border border-[#446391]/35 bg-[#071834]/85 p-6 sm:p-10 lg:p-12 shadow-2xl backdrop-blur-md">
+        <div className="relative min-h-[460px] sm:min-h-[400px] overflow-hidden rounded-3xl border border-[#446391]/35 bg-[#071834]/62 p-6 sm:p-10 lg:p-12 shadow-2xl backdrop-blur-md">
           <AnimatePresence custom={direction} mode="wait">
             <motion.div
               key={currentIndex}

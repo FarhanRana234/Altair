@@ -38,7 +38,7 @@ export default function ProjectShowcase() {
           transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
           className="flex flex-col items-center"
         >
-          <div className="glass-card w-full overflow-hidden border border-[#446391]/35 bg-[#071834]/85 shadow-2xl">
+          <div className="glass-card w-full overflow-hidden border border-[#446391]/35 bg-[#071834]/62 shadow-2xl">
             <div className="relative h-[340px] w-full sm:h-[440px]">
               <Glider3DViewer />
             </div>
