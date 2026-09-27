@@ -134,7 +134,7 @@ export default function Footer() {
           </p>
 
           <p className="font-mono text-[11px] font-normal uppercase tracking-widest text-slate-400">
-            AeroPakistan 2027 · NEDUET × CUST
+            AeroPakistan 2027
           </p>
         </div>
       </div>

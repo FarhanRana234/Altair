@@ -38,14 +38,14 @@ const TEAM_MEMBERS: TeamMember[] = [
   {
     name: "Yamaan Ali",
     role: "Structures and Manufacturing",
-    institution: "CUST",
+    institution: "NEDUEST",
     quote: "Baggin that highest engineering score fs",
     image: "/team/yamaan.png",
   },
   {
     name: "Hamna Maryam",
     role: "Project Manager",
-    institution: "NEDUET",
+    institution: "CUST",
     quote: "Stand back, we got this",
     image: "/team/humna.png",
   },
