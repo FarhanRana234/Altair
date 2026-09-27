@@ -131,6 +131,7 @@ export default function HeroCanvas() {
     let flightTrigger: ScrollTrigger | null = null;
     const progress = { value: 0 };
     const curve = new THREE.CatmullRomCurve3([]);
+    let previousTangentAngle: number | null = null;
 
     const updateFlightPath = () => {
       const bounds = getViewportBounds();
@@ -145,7 +146,12 @@ export default function HeroCanvas() {
       const tangent = curve.getTangentAt(t).normalize();
       // Use the continuous tangent directly. Flipping the angle by π when the
       // path crosses vertical makes the nose suddenly reverse mid-flight.
-      const tangentAngle = Math.atan2(tangent.y, tangent.x);
+      let tangentAngle = Math.atan2(tangent.y, tangent.x);
+      if (previousTangentAngle !== null) {
+        while (tangentAngle - previousTangentAngle > Math.PI) tangentAngle -= Math.PI * 2;
+        while (tangentAngle - previousTangentAngle < -Math.PI) tangentAngle += Math.PI * 2;
+      }
+      previousTangentAngle = tangentAngle;
       const scale = THREE.MathUtils.lerp(1.08, 0.94, t);
 
       target.current.x = position.x;
