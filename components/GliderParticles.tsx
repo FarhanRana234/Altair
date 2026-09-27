@@ -195,6 +195,10 @@ function GliderRig({ url, target, mode }: Props) {
   const current = useRef({ ...target.current });
   const currentQuaternion = useRef(new THREE.Quaternion());
   const targetQuaternion = useRef(new THREE.Quaternion());
+  const headingQuaternion = useRef(new THREE.Quaternion());
+  const bankQuaternion = useRef(new THREE.Quaternion());
+  const forwardAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
+  const flightDirection = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2(10, 10));
   const texture = useMemo(() => dotTexture(), []);
   const meshes = useMemo(() => getMeshes(scene), [scene]);
@@ -289,16 +293,12 @@ function GliderRig({ url, target, mode }: Props) {
       // The sampled model's nose is local +Y. Align that axis directly to the
       // screen-space travel tangent, then bank around the nose so the wings
       // keep a visible 3D angle without ever inverting the aircraft.
-      // Apply the authored screen-facing offset so the initial hero pose reads
-      // as a shallow banked glide rather than standing vertically.
-      // The sampled mesh's nose is opposite the screen-space +Y axis.
-      // Reverse the heading so leftward travel shows the nose pointing right,
-      // matching the intended opening pose and the lower flight direction.
-      // Use a single upright screen-space heading. Building the orientation from
-      // this constrained angle avoids quaternion roll ambiguity as the path turns
-      // through the lower half of the page, so the glider never flies inverted.
-      const heading = active.rotZ + Math.PI / 2 + Math.PI;
-      targetQuaternion.current.setFromEuler(new THREE.Euler(0, 0, heading, "XYZ"));
+      flightDirection.set(Math.cos(active.rotZ + Math.PI / 2), Math.sin(active.rotZ + Math.PI / 2), 0).normalize();
+      headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
+      // The source mesh is authored inverted around its forward axis; this
+      // half-turn puts the tail fin above the fuselage, with a slight bank.
+      bankQuaternion.current.setFromAxisAngle(forwardAxis, Math.PI + 0.24);
+      targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
     }
