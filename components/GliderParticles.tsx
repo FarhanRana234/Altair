@@ -295,14 +295,15 @@ function GliderRig({ url, target, mode }: Props) {
       // keep a visible 3D angle without ever inverting the aircraft.
       // Apply the authored screen-facing offset so the initial hero pose reads
       // as a shallow banked glide rather than standing vertically.
-      // Mirror the authored pose horizontally: the glider nose follows the
-      // screen-space travel direction without the previous 180-degree reversal.
-      const heading = active.rotZ + Math.PI / 2;
+      // The sampled mesh's nose is opposite the screen-space +Y axis.
+      // Reverse the heading so leftward travel shows the nose pointing right,
+      // matching the intended opening pose and the lower flight direction.
+      const heading = active.rotZ + Math.PI / 2 + Math.PI;
       flightDirection.set(Math.cos(heading), Math.sin(heading), 0).normalize();
       headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
       // Bank only around the nose axis. Do not add a half-turn here: it flips
       // the underside to the top during the lower part of the flight.
-      bankQuaternion.current.setFromAxisAngle(forwardAxis, -0.24);
+      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.24);
       targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
