@@ -287,7 +287,9 @@ function GliderRig({ url, target, mode }: Props) {
       // Keep rotation entirely in screen space. Applying the path angle as a
       // single Z rotation removes quaternion roll ambiguity at the final turn,
       // so the glider stays upright while its nose follows the tangent.
-      orientation.current.rotation.set(0, 0, active.rotZ + Math.PI);
+      // Add a restrained pitch/yaw perspective while keeping the path heading
+      // on Z, making the fuselage and wings read as a 3D object.
+      orientation.current.rotation.set(0.14, -0.2, active.rotZ + Math.PI, "YXZ");
     }
 
     uniforms.u_time.value = state.clock.elapsedTime;
