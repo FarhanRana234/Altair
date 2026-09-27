@@ -7,7 +7,7 @@ const NUVEX_HEIGHT = 32;
 
 export default function OrganizedByCard() {
   return (
-    <div className="mx-auto w-full max-w-3xl rounded-2xl border border-[#446391]/30 bg-[#071834]/80 px-6 py-10 text-center shadow-[0_0_50px_rgba(7,24,52,0.8)] backdrop-blur-md sm:px-10">
+    <div className="mx-auto w-full max-w-3xl rounded-2xl border border-[#446391]/30 bg-[#071834]/58 px-6 py-10 text-center shadow-[0_0_50px_rgba(7,24,52,0.8)] backdrop-blur-md sm:px-10">
       <p className="eyebrow mb-8">Organized &amp; Supported By</p>
 
       <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">

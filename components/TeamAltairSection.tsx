@@ -121,7 +121,7 @@ export default function TeamAltairSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, delay: i * 0.08, ease: "easeOut" }}
-              className="glass-card flex flex-col justify-between p-6 sm:p-7 border border-[#446391]/35 bg-[#071834]/62 hover:border-[#7DA7D9]/50 transition-colors"
+              className="glass-card flex flex-col justify-between p-6 sm:p-7 border border-[#446391]/35 bg-[#071834]/48 hover:border-[#7DA7D9]/50 transition-colors"
             >
               <div>
                 <div className="text-4xl sm:text-5xl font-display mb-2 text-white">

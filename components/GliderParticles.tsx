@@ -24,7 +24,7 @@ export type GliderTarget = {
 useGLTF.preload(LOCAL_GLIDER_URL);
 
 // Keep the silhouette airy while using larger particles so the glider reads clearly on every viewport.
-const PARTICLE_COUNT = 12000;
+const PARTICLE_COUNT = 8000;
 
 const vertexShader = `
   attribute vec3 a_target;
@@ -213,7 +213,7 @@ function GliderRig({ url, target, mode }: Props) {
   const geometry = useMemo(() => {
     if (!meshes.length) return null;
     const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
-    const particleCount = isDesktop ? 10500 : PARTICLE_COUNT;
+    const particleCount = isDesktop ? 7000 : PARTICLE_COUNT;
     const positions = new Float32Array(particleCount * 3);
     const data = meshes.map((mesh) => ({ geometry: mesh.geometry, area: areaData(mesh.geometry).area }));
     const totalArea = data.reduce((sum, item) => sum + item.area, 0);
