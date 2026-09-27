@@ -24,7 +24,7 @@ export type GliderTarget = {
 useGLTF.preload(LOCAL_GLIDER_URL);
 
 // Keep the mobile silhouette light while giving desktop enough points for a clear nose and wings.
-const PARTICLE_COUNT = 18000;
+const PARTICLE_COUNT = 9000;
 
 const vertexShader = `
   attribute vec3 a_target;
@@ -211,7 +211,7 @@ function GliderRig({ url, target, mode }: Props) {
   const geometry = useMemo(() => {
     if (!meshes.length) return null;
     const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
-    const particleCount = isDesktop ? 40000 : PARTICLE_COUNT;
+    const particleCount = isDesktop ? 18000 : PARTICLE_COUNT;
     const positions = new Float32Array(particleCount * 3);
     const data = meshes.map((mesh) => ({ geometry: mesh.geometry, area: areaData(mesh.geometry).area }));
     const totalArea = data.reduce((sum, item) => sum + item.area, 0);
@@ -230,7 +230,7 @@ function GliderRig({ url, target, mode }: Props) {
     const sizes = new Float32Array(particleCount);
     for (let i = 0; i < particleCount; i += 1) {
       const angle = (i / particleCount) * Math.PI * 2;
-      const radius = 0.62 + (i % 17) * 0.006;
+      const radius = 0.78 + (i % 17) * 0.007;
       targets[i * 3] = Math.cos(angle) * radius;
       targets[i * 3 + 1] = Math.sin(angle) * radius * 0.42;
       targets[i * 3 + 2] = Math.sin(angle * 3) * 0.035;
