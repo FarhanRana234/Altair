@@ -49,7 +49,7 @@
 - **Component:** `<SponsorshipFormModal />`
 - **Functionality:**
   - Interactive form capturing: Full Name, Corporate Email, Company/Organization Name, Selected Sponsorship Tier, and Note.
-  - Submits payload directly to `altair.aeropak@gmail.com` via Web3Forms endpoint using `process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY`[cite: 1, 2].
+  - Submits payload directly to `altair.aeropak@gmail.com` via Web3Forms endpoint using `process.env.WEB3FORMS_ACCESS_KEY`[cite: 1, 2].
   - On successful submission, triggers an instant browser download of `ALTAIR_SPONSORSHIP_PROPOSAL.pdf` from the `/public` directory[cite: 1, 2].
 
 ### C. Interactive Sponsorship Tier & Budget Explorer
