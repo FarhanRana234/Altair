@@ -101,11 +101,11 @@ export default function Footer() {
             className="inline-flex flex-col items-center gap-3 font-mono text-xs uppercase tracking-[0.22em] text-[#7DA7D9] transition-colors hover:text-white"
           >
             <img
-              src="/assets/pixify-web-logo.jpg"
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1790522367427-MvHhAYZJKw4eZvfKMAlNmpNdG621Ui.jpg"
               alt="Pixify Web"
-              width={96}
-              height={96}
-              className="size-16 rounded-xl object-cover shadow-lg shadow-[#071834]/40"
+              width={128}
+              height={128}
+              className="size-24 rounded-xl object-cover shadow-lg shadow-[#071834]/40"
             />
             <span className="inline-flex items-center gap-2">
               <Instagram className="h-4 w-4" />
