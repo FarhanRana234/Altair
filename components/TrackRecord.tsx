@@ -29,12 +29,12 @@ const METRICS: Metric[] = [
     value: "3",
     suffix: "rd",
     label: "Race Performance",
-    sublabel: "Top 3 finish",
+    sublabel: "Top 3 in race performance",
   },
   {
     value: "2",
     label: "Community Events",
-    sublabel: "SportsFest with 25 teams · Beach clean-up with Alkhidmat",
+    sublabel: "SportsFest with 15 teams · Beach clean-up with Alkhidmat",
   },
 ];
 
@@ -90,7 +90,7 @@ export default function TrackRecord() {
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="mb-14 flex flex-col items-center text-center"
       >
-        <h2 className="section-heading text-4xl sm:text-5xl lg:text-6xl text-white">PROVEN TRACK RECORD</h2>
+        <h2 className="section-heading text-5xl text-white sm:text-6xl lg:text-7xl">PROVEN TRACK RECORD</h2>
         <p className="section-body mt-4 max-w-2xl">
           From podium performance to community impact, our record reflects the
           engineering, teamwork, and purpose behind Team Altair.
@@ -122,15 +122,6 @@ export default function TrackRecord() {
         ))}
       </div>
 
-      <motion.p
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.3 }}
-        className="mt-10 text-center text-sm font-light tracking-widest text-slate-400/90"
-      >
-        National media exposure — BBC Urdu · DAWN · ProPakistani
-      </motion.p>
     </section>
   );
 }
