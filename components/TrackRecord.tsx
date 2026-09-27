@@ -17,7 +17,7 @@ const METRICS: Metric[] = [
     value: "1",
     suffix: "st",
     label: "1st Runners-Up",
-    sublabel: "Team DriftX",
+    sublabel: "Team name: DriftX",
   },
   {
     value: "190",
