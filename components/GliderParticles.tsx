@@ -298,13 +298,11 @@ function GliderRig({ url, target, mode }: Props) {
       // The sampled mesh's nose is opposite the screen-space +Y axis.
       // Reverse the heading so leftward travel shows the nose pointing right,
       // matching the intended opening pose and the lower flight direction.
+      // Use a single upright screen-space heading. Building the orientation from
+      // this constrained angle avoids quaternion roll ambiguity as the path turns
+      // through the lower half of the page, so the glider never flies inverted.
       const heading = active.rotZ + Math.PI / 2 + Math.PI;
-      flightDirection.set(Math.cos(heading), Math.sin(heading), 0).normalize();
-      headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
-      // Bank only around the nose axis. Do not add a half-turn here: it flips
-      // the underside to the top during the lower part of the flight.
-      bankQuaternion.current.setFromAxisAngle(forwardAxis, 0.24);
-      targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
+      targetQuaternion.current.setFromEuler(new THREE.Euler(0, 0, heading, "XYZ"));
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
     }

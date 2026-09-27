@@ -44,7 +44,7 @@ export default function ProjectShowcase() {
             </div>
             <div className="flex items-center justify-between border-t border-[#446391]/30 bg-[#071834]/90 px-6 py-4">
               <span className="font-mono text-xs font-normal uppercase tracking-widest text-slate-300">
-                (3D VIEWPORT)
+                Our glider
               </span>
             </div>
           </div>
