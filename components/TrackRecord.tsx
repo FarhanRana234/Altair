@@ -16,7 +16,7 @@ const METRICS: Metric[] = [
   {
     value: "1",
     suffix: "st",
-    label: "Runners-Up",
+    label: "1st Runners-Up",
     sublabel: "Team DriftX",
   },
   {
@@ -90,7 +90,7 @@ export default function TrackRecord() {
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="mb-14 flex flex-col items-center text-center"
       >
-        <h2 className="section-heading text-5xl text-white sm:text-6xl lg:text-7xl">PROVEN TRACK RECORD</h2>
+        <h2 className="section-heading text-6xl text-white sm:text-7xl lg:text-8xl">PROVEN TRACK RECORD</h2>
         <p className="section-body mt-4 max-w-2xl">
           From podium performance to community impact, our record reflects the
           engineering, teamwork, and purpose behind Team Altair.
