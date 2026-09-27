@@ -24,8 +24,6 @@ export default function Hero() {
       id="top"
       className="relative flex h-screen min-h-[640px] w-full items-center justify-center overflow-hidden px-6"
     >
-      <div className="pointer-events-none absolute inset-0 z-[8] bg-gradient-to-b from-[#071834]/60 via-transparent to-[#071834]/80" />
-
       <motion.div
         initial={{ opacity: 0, y: 34 }}
         animate={{ opacity: 1, y: 0 }}

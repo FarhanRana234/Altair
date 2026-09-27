@@ -14,8 +14,6 @@ export default function EventsSection() {
         className="pointer-events-none absolute inset-0 opacity-[0.07] bg-repeat"
         style={{ backgroundImage: `url('/brand/crane-pattern-tile.svg')`, backgroundSize: "240px 240px" }}
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#071834] via-transparent to-[#071834]" />
-
       <div className="relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
