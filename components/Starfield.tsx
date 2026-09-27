@@ -22,7 +22,7 @@ const COLORS = [
 
 function getStarCount(width: number, height: number) {
   const area = width * height;
-  const density = width >= 1200 ? 1900 : width >= 768 ? 1500 : 1050;
+    const density = width >= 1200 ? 2400 : width >= 768 ? 1800 : 1050;
   return Math.round(Math.min(density, Math.max(900, area / (width >= 768 ? 2600 : 3400))));
 }
 
@@ -32,7 +32,7 @@ function buildStars(count: number, width: number, height: number): Star[] {
     y: Math.random() * height,
     vx: (Math.random() - 0.5) * 0.12,
     vy: (Math.random() - 0.5) * 0.12,
-    r: Math.random() * 1.45 + 0.35,
+    r: Math.random() < 0.12 ? Math.random() * 2.2 + 1.1 : Math.random() * 1.45 + 0.35,
     color: COLORS[Math.floor(Math.random() * COLORS.length)],
     phase: Math.random() * Math.PI * 2,
     speed: Math.random() * 0.6 + 0.35,

@@ -20,15 +20,19 @@ export const metadata: Metadata = {
   title: "ALTAIR — wingspans beyond the stars.",
   description:
     "ALTAIR is a student-led engineering team from NEDUET and CUST designing, building, and racing a next-generation glider for AeroPakistan 2027.",
-  icons: {
-    icon: "/brand/crane-icon-favicon.svg",
-    apple: "/brand/crane-icon-favicon.svg",
-  },
   openGraph: {
     title: "ALTAIR — wingspans beyond the stars.",
     description:
       "ALTAIR is a student-led engineering team from NEDUET and CUST designing, building, and racing a next-generation glider for AeroPakistan 2027.",
     type: "website",
+    images: [
+      {
+        url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot_20260927-121040-7LkxshNfTORsVLqSgfhV5oXCV2U0Vc.png",
+        width: 946,
+        height: 394,
+        alt: "altair logo",
+      },
+    ],
   },
 };
 
