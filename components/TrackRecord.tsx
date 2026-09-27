@@ -17,15 +17,25 @@ const METRICS: Metric[] = [
     value: "1",
     suffix: "st",
     label: "Runners-Up",
-    sublabel: "Formula Pakistan 2026",
+    sublabel: "Team DriftX",
   },
   {
-    value: "185.0",
-    decimals: 1,
-    label: "Top Score",
-    sublabel: "Highest Engineering & Design score nationally",
+    value: "190",
+    suffix: " / 200",
+    label: "Engineering & Design",
+    sublabel: "Competition score",
   },
-
+  {
+    value: "3",
+    suffix: "rd",
+    label: "Race Performance",
+    sublabel: "Top 3 finish",
+  },
+  {
+    value: "2",
+    label: "Community Events",
+    sublabel: "SportsFest with 25 teams · Beach clean-up with Alkhidmat",
+  },
 ];
 
 function formatNumber(raw: string): number {
@@ -80,10 +90,10 @@ export default function TrackRecord() {
         transition={{ duration: 0.9, ease: "easeOut" }}
         className="mb-14 flex flex-col items-center text-center"
       >
-        <h2 className="section-heading">BUILT ON PROVEN WINGS</h2>
+        <h2 className="section-heading text-4xl sm:text-5xl lg:text-6xl text-white">PROVEN TRACK RECORD</h2>
         <p className="section-body mt-4 max-w-2xl">
-          ALTAIR is the direct successor to Team DriftX — 1st Runners-Up at
-          Formula Pakistan 2026. Our numbers speak for themselves.
+          From podium performance to community impact, our record reflects the
+          engineering, teamwork, and purpose behind Team Altair.
         </p>
       </motion.div>
 

@@ -71,7 +71,7 @@ export function computeWaypointPos(
     ? bounds.isLandscape
       ? 0.42
       : 0.36
-    : 0.52;
+    : 0.7;
 
   return {
     x: wp.xPct * safeHalfW,
@@ -144,8 +144,11 @@ export default function HeroCanvas() {
       const position = curve.getPointAt(t);
       const tangent = curve.getTangentAt(t).normalize();
       // Three.js screen-space rotation maps local +X to the path tangent.
-      const tangentAngle = Math.atan2(tangent.y, tangent.x);
-      const scale = THREE.MathUtils.lerp(0.95, 0.82, t);
+      let tangentAngle = Math.atan2(tangent.y, tangent.x);
+      // Keep the aircraft upright while it pitches toward the lower sections.
+      if (tangentAngle > Math.PI / 2) tangentAngle -= Math.PI;
+      if (tangentAngle < -Math.PI / 2) tangentAngle += Math.PI;
+      const scale = THREE.MathUtils.lerp(1.08, 0.94, t);
 
       target.current.x = position.x;
       target.current.y = position.y;
