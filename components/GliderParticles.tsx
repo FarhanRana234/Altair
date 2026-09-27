@@ -391,8 +391,9 @@ function GliderRig({ url, target, mode }: RigProps) {
 
     const speed = Math.hypot(screenDx, screenDy);
 
-    // Base offset: 0 because nose lines up with angle 0 (towards right) in screen coordinates
-    const baseOffset = 0;
+    // Restore the pre-mirror orientation: the model's authored nose is 180°
+    // opposite the screen-space travel vector.
+    const baseOffset = 180;
 
     if (speed > 0.0003) {
       const angleDeg = Math.atan2(screenDy, screenDx) * (180 / Math.PI) + baseOffset;
