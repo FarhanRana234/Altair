@@ -196,7 +196,9 @@ function GliderRig({ url, target, mode }: Props) {
   const currentQuaternion = useRef(new THREE.Quaternion());
   const targetQuaternion = useRef(new THREE.Quaternion());
   const headingQuaternion = useRef(new THREE.Quaternion());
-  const orientationEuler = useRef(new THREE.Euler());
+  const bankQuaternion = useRef(new THREE.Quaternion());
+  const forwardAxis = useMemo(() => new THREE.Vector3(0, 1, 0), []);
+  const flightDirection = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2(10, 10));
   const texture = useMemo(() => dotTexture(), []);
   const meshes = useMemo(() => getMeshes(scene), [scene]);
@@ -208,9 +210,8 @@ function GliderRig({ url, target, mode }: Props) {
 
   const geometry = useMemo(() => {
     if (!meshes.length) return null;
-    const particleCount = typeof window !== "undefined" && window.innerWidth >= 1024
-      ? 30000
-      : PARTICLE_COUNT;
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
+    const particleCount = isDesktop ? 40000 : PARTICLE_COUNT;
     const positions = new Float32Array(particleCount * 3);
     const data = meshes.map((mesh) => ({ geometry: mesh.geometry, area: areaData(mesh.geometry).area }));
     const totalArea = data.reduce((sum, item) => sum + item.area, 0);
@@ -233,7 +234,7 @@ function GliderRig({ url, target, mode }: Props) {
       targets[i * 3] = Math.cos(angle) * radius;
       targets[i * 3 + 1] = Math.sin(angle) * radius * 0.42;
       targets[i * 3 + 2] = Math.sin(angle * 3) * 0.035;
-      sizes[i] = 0.04 + Math.random() * 0.025;
+      sizes[i] = isDesktop ? 0.045 + Math.random() * 0.03 : 0.04 + Math.random() * 0.025;
     }
     const result = new THREE.BufferGeometry();
     result.setAttribute("position", new THREE.BufferAttribute(positions, 3));
@@ -289,12 +290,15 @@ function GliderRig({ url, target, mode }: Props) {
       root.current.scale.setScalar(active.scale);
     }
     if (orientation.current) {
-      // Align the model nose with the path tangent and keep a restrained bank
-      // so the wings remain readable as a 3D form instead of pointing upward.
-      // The sampled glider's nose is authored along local +Y.
-      orientationEuler.current.set(0.28, -0.34, active.rotZ - Math.PI / 2, "XYZ");
-      headingQuaternion.current.setFromEuler(orientationEuler.current);
-      targetQuaternion.current.copy(headingQuaternion.current);
+      // The sampled model's nose is local +Y. Align that axis directly to the
+      // screen-space travel tangent, then bank around the nose so the wings
+      // keep a visible 3D angle without ever inverting the aircraft.
+      flightDirection.set(Math.cos(active.rotZ + Math.PI / 2), Math.sin(active.rotZ + Math.PI / 2), 0).normalize();
+      headingQuaternion.current.setFromUnitVectors(forwardAxis, flightDirection);
+      // The source mesh is authored inverted around its forward axis; this
+      // half-turn puts the tail fin above the fuselage, with a slight bank.
+      bankQuaternion.current.setFromAxisAngle(forwardAxis, Math.PI + 0.24);
+      targetQuaternion.current.copy(headingQuaternion.current).multiply(bankQuaternion.current);
       currentQuaternion.current.slerp(targetQuaternion.current, 1 - Math.exp(-9 * dt));
       orientation.current.quaternion.copy(currentQuaternion.current);
     }
