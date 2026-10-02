@@ -168,32 +168,35 @@ export default function HeroCanvas() {
 
     };
 
+    const updateFromScroll = () => {
+      const scrollableHeight = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      progress.value = THREE.MathUtils.clamp(window.scrollY / scrollableHeight, 0, 1);
+      updateFlightPath();
+    };
+
     const buildTimeline = () => {
       flightTrigger?.kill();
-      updateFlightPath();
+      updateFromScroll();
       flightTrigger = ScrollTrigger.create({
         trigger: document.documentElement,
         start: "top top",
         end: "bottom bottom",
         invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          // Read ScrollTrigger progress directly so reverse scrolling immediately
-          // moves the glider back up the path instead of leaving a scrub tween behind.
-          progress.value = self.progress;
-          updateFlightPath();
-        },
+        onUpdate: updateFromScroll,
       });
-      progress.value = flightTrigger.progress;
-      updateFlightPath();
+      updateFromScroll();
       ScrollTrigger.refresh();
     };
 
     buildTimeline();
+    const handleScroll = () => updateFromScroll();
     const handleResize = () => buildTimeline();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleResize);
 
     return () => {
+      window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
       flightTrigger?.kill();
