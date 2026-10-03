@@ -247,16 +247,16 @@ function GliderRig({ url, target, mode }: Props) {
 
   useEffect(() => {
     const update = (x: number, y: number) => pointer.current.set((x / window.innerWidth) * 2 - 1, 1 - (y / window.innerHeight) * 2);
-    const move = (event: MouseEvent) => update(event.clientX, event.clientY);
+    const move = (event: PointerEvent) => update(event.clientX, event.clientY);
     const touch = (event: TouchEvent) => { const item = event.touches[0]; if (item) update(item.clientX, item.clientY); };
     const clear = () => pointer.current.set(10, 10);
-    window.addEventListener("mousemove", move, { passive: true });
+    window.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("touchstart", touch, { passive: true });
     window.addEventListener("touchmove", touch, { passive: true });
     window.addEventListener("touchend", clear, { passive: true });
     window.addEventListener("touchcancel", clear, { passive: true });
     return () => {
-      window.removeEventListener("mousemove", move);
+      window.removeEventListener("pointermove", move);
       window.removeEventListener("touchstart", touch);
       window.removeEventListener("touchmove", touch);
       window.removeEventListener("touchend", clear);
@@ -268,7 +268,6 @@ function GliderRig({ url, target, mode }: Props) {
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1);
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const next = target.current;
     const active = current.current;
     const damp = (value: number, destination: number) => THREE.MathUtils.damp(value, destination, 5, dt);
@@ -294,15 +293,15 @@ function GliderRig({ url, target, mode }: Props) {
 
     uniforms.u_time.value = state.clock.elapsedTime;
     uniforms.u_transition.value = THREE.MathUtils.damp(uniforms.u_transition.value, mode === "particles" ? 0 : 1, 3, dt);
-    const mouseX = reduced ? 10 : pointer.current.x;
-    const mouseY = reduced ? 10 : pointer.current.y;
+    const mouseX = pointer.current.x;
+    const mouseY = pointer.current.y;
     uniforms.u_mouse.value.x = THREE.MathUtils.damp(uniforms.u_mouse.value.x, mouseX, 8, dt);
     uniforms.u_mouse.value.y = THREE.MathUtils.damp(uniforms.u_mouse.value.y, mouseY, 8, dt);
     uniforms.u_mouse.value.z = 0;
 
     if (points.current) {
       const material = points.current.material as THREE.ShaderMaterial;
-      material.opacity = THREE.MathUtils.damp(material.opacity ?? 0.95, mode === "particles" && !reduced ? 0.95 : 0, 6, dt);
+      material.opacity = THREE.MathUtils.damp(material.opacity ?? 0.95, mode === "particles" ? 0.95 : 0, 6, dt);
     }
     if (solids.current) solids.current.children.forEach((child) => {
       const material = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;

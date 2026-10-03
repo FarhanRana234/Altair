@@ -75,7 +75,7 @@ export default function Navbar({ onSponsorClick }: { onSponsorClick: () => void 
           </a>
         </motion.div>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
           {LINKS.map((link) => {
             const isActive = activeSection === link.href;
             return (
@@ -110,7 +110,7 @@ export default function Navbar({ onSponsorClick }: { onSponsorClick: () => void 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open navigation menu"}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-[#446391]/30 bg-[#071834]/80 text-white lg:hidden transition-colors hover:border-[#7DA7D9]"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-[#446391]/30 bg-[#071834]/80 text-white md:hidden transition-colors hover:border-[#7DA7D9]"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -125,7 +125,7 @@ export default function Navbar({ onSponsorClick }: { onSponsorClick: () => void 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-x-0 top-[65px] z-40 border-b border-[#446391]/30 bg-[#071834]/95 px-6 py-6 shadow-2xl backdrop-blur-xl lg:hidden"
+            className="fixed inset-x-0 top-[65px] z-40 border-b border-[#446391]/30 bg-[#071834]/95 px-6 py-6 shadow-2xl backdrop-blur-xl md:hidden"
           >
             <nav className="flex flex-col gap-4">
               {LINKS.map((link) => (

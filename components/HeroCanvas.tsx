@@ -3,16 +3,12 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import GliderParticles, {
   type GliderTarget,
 } from "./GliderParticles";
 import CanvasErrorBoundary from "./CanvasErrorBoundary";
 import ModelErrorBoundary from "./ModelErrorBoundary";
 import { LOCAL_GLIDER_URL, FALLBACK_GLIDER_URL } from "../lib/gltf";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export type RelativeWaypoint = {
   xPct: number;
@@ -114,21 +110,8 @@ export default function HeroCanvas() {
   }, []);
 
   useEffect(() => {
-    // Respect prefers-reduced-motion: show a static, correctly-oriented pose instead of animating
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (motionQuery.matches) {
-      const bounds = getViewportBounds();
-      const staticPos = computeWaypointPos(FLIGHT_WAYPOINTS[0], bounds);
-      target.current.x = staticPos.x;
-      target.current.y = staticPos.y;
-      target.current.scale = staticPos.scale;
-      target.current.rotX = FLIGHT_WAYPOINTS[0].rotX;
-      target.current.rotY = FLIGHT_WAYPOINTS[0].rotY;
-      target.current.rotZ = FLIGHT_WAYPOINTS[0].rotZ;
-      return;
-    }
-
-    let flightTrigger: ScrollTrigger | null = null;
+    // Keep the scroll-controlled flight active across browser and OS motion
+    // settings; the glider is the page's primary navigation cue.
     const progress = { value: 0 };
     const curve = new THREE.CatmullRomCurve3([]);
     let previousTangentAngle: number | null = null;
@@ -175,31 +158,24 @@ export default function HeroCanvas() {
     };
 
     const buildTimeline = () => {
-      flightTrigger?.kill();
       updateFromScroll();
-      flightTrigger = ScrollTrigger.create({
-        trigger: document.documentElement,
-        start: "top top",
-        end: "bottom bottom",
-        invalidateOnRefresh: true,
-        onUpdate: updateFromScroll,
-      });
-      updateFromScroll();
-      ScrollTrigger.refresh();
     };
 
-    buildTimeline();
-    const handleScroll = () => updateFromScroll();
+    let frame = 0;
+    const sync = () => {
+      updateFromScroll();
+      frame = window.requestAnimationFrame(sync);
+    };
     const handleResize = () => buildTimeline();
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    buildTimeline();
+    frame = window.requestAnimationFrame(sync);
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleResize);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
-      flightTrigger?.kill();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -211,6 +187,7 @@ export default function HeroCanvas() {
   return (
     <div
       className="altair-hero-canvas pointer-events-none fixed inset-0 z-0 will-change-transform"
+    data-scroll-container="window"
       style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh" }}
     >
       <CanvasErrorBoundary fallback={null}>

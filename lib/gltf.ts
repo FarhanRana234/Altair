@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export const LOCAL_GLIDER_URL = "/models/glider.glb";
+export const LOCAL_GLIDER_URL = "/models/file-1621681765023.glb";
 
 export const FALLBACK_GLIDER_URL =
   "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumAir/glTF-Binary/CesiumAir.glb";
