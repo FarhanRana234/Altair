@@ -173,15 +173,19 @@ export default function HeroCanvas() {
       updateFromScroll();
     };
 
-    buildTimeline();
-    const handleScroll = () => updateFromScroll();
+    let frame = 0;
+    const sync = () => {
+      updateFromScroll();
+      frame = window.requestAnimationFrame(sync);
+    };
     const handleResize = () => buildTimeline();
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    buildTimeline();
+    frame = window.requestAnimationFrame(sync);
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleResize);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
     };

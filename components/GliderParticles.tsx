@@ -247,16 +247,16 @@ function GliderRig({ url, target, mode }: Props) {
 
   useEffect(() => {
     const update = (x: number, y: number) => pointer.current.set((x / window.innerWidth) * 2 - 1, 1 - (y / window.innerHeight) * 2);
-    const move = (event: MouseEvent) => update(event.clientX, event.clientY);
+    const move = (event: PointerEvent) => update(event.clientX, event.clientY);
     const touch = (event: TouchEvent) => { const item = event.touches[0]; if (item) update(item.clientX, item.clientY); };
     const clear = () => pointer.current.set(10, 10);
-    window.addEventListener("mousemove", move, { passive: true });
+    window.addEventListener("pointermove", move, { passive: true });
     window.addEventListener("touchstart", touch, { passive: true });
     window.addEventListener("touchmove", touch, { passive: true });
     window.addEventListener("touchend", clear, { passive: true });
     window.addEventListener("touchcancel", clear, { passive: true });
     return () => {
-      window.removeEventListener("mousemove", move);
+      window.removeEventListener("pointermove", move);
       window.removeEventListener("touchstart", touch);
       window.removeEventListener("touchmove", touch);
       window.removeEventListener("touchend", clear);
