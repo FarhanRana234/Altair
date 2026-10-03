@@ -3,16 +3,12 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import GliderParticles, {
   type GliderTarget,
 } from "./GliderParticles";
 import CanvasErrorBoundary from "./CanvasErrorBoundary";
 import ModelErrorBoundary from "./ModelErrorBoundary";
 import { LOCAL_GLIDER_URL, FALLBACK_GLIDER_URL } from "../lib/gltf";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export type RelativeWaypoint = {
   xPct: number;
@@ -128,7 +124,6 @@ export default function HeroCanvas() {
       return;
     }
 
-    let flightTrigger: ScrollTrigger | null = null;
     const progress = { value: 0 };
     const curve = new THREE.CatmullRomCurve3([]);
     let previousTangentAngle: number | null = null;
@@ -175,17 +170,7 @@ export default function HeroCanvas() {
     };
 
     const buildTimeline = () => {
-      flightTrigger?.kill();
       updateFromScroll();
-      flightTrigger = ScrollTrigger.create({
-        trigger: document.documentElement,
-        start: "top top",
-        end: "bottom bottom",
-        invalidateOnRefresh: true,
-        onUpdate: updateFromScroll,
-      });
-      updateFromScroll();
-      ScrollTrigger.refresh();
     };
 
     buildTimeline();
@@ -199,7 +184,6 @@ export default function HeroCanvas() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleResize);
-      flightTrigger?.kill();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -211,6 +195,7 @@ export default function HeroCanvas() {
   return (
     <div
       className="altair-hero-canvas pointer-events-none fixed inset-0 z-0 will-change-transform"
+    data-scroll-container="window"
       style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh" }}
     >
       <CanvasErrorBoundary fallback={null}>
