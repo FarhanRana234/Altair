@@ -268,7 +268,6 @@ function GliderRig({ url, target, mode }: Props) {
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1);
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const next = target.current;
     const active = current.current;
     const damp = (value: number, destination: number) => THREE.MathUtils.damp(value, destination, 5, dt);
@@ -294,15 +293,15 @@ function GliderRig({ url, target, mode }: Props) {
 
     uniforms.u_time.value = state.clock.elapsedTime;
     uniforms.u_transition.value = THREE.MathUtils.damp(uniforms.u_transition.value, mode === "particles" ? 0 : 1, 3, dt);
-    const mouseX = reduced ? 10 : pointer.current.x;
-    const mouseY = reduced ? 10 : pointer.current.y;
+    const mouseX = pointer.current.x;
+    const mouseY = pointer.current.y;
     uniforms.u_mouse.value.x = THREE.MathUtils.damp(uniforms.u_mouse.value.x, mouseX, 8, dt);
     uniforms.u_mouse.value.y = THREE.MathUtils.damp(uniforms.u_mouse.value.y, mouseY, 8, dt);
     uniforms.u_mouse.value.z = 0;
 
     if (points.current) {
       const material = points.current.material as THREE.ShaderMaterial;
-      material.opacity = THREE.MathUtils.damp(material.opacity ?? 0.95, mode === "particles" && !reduced ? 0.95 : 0, 6, dt);
+      material.opacity = THREE.MathUtils.damp(material.opacity ?? 0.95, mode === "particles" ? 0.95 : 0, 6, dt);
     }
     if (solids.current) solids.current.children.forEach((child) => {
       const material = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;

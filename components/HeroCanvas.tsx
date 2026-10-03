@@ -110,20 +110,8 @@ export default function HeroCanvas() {
   }, []);
 
   useEffect(() => {
-    // Respect prefers-reduced-motion: show a static, correctly-oriented pose instead of animating
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (motionQuery.matches) {
-      const bounds = getViewportBounds();
-      const staticPos = computeWaypointPos(FLIGHT_WAYPOINTS[0], bounds);
-      target.current.x = staticPos.x;
-      target.current.y = staticPos.y;
-      target.current.scale = staticPos.scale;
-      target.current.rotX = FLIGHT_WAYPOINTS[0].rotX;
-      target.current.rotY = FLIGHT_WAYPOINTS[0].rotY;
-      target.current.rotZ = FLIGHT_WAYPOINTS[0].rotZ;
-      return;
-    }
-
+    // Keep the scroll-controlled flight active across browser and OS motion
+    // settings; the glider is the page's primary navigation cue.
     const progress = { value: 0 };
     const curve = new THREE.CatmullRomCurve3([]);
     let previousTangentAngle: number | null = null;
