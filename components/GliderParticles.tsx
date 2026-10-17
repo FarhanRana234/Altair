@@ -298,11 +298,11 @@ function GliderRig({ url, target, mode }: Props) {
 
     if (points.current) {
       const material = points.current.material as THREE.ShaderMaterial;
-      material.opacity = THREE.MathUtils.damp(material.opacity ?? 0.95, mode === "particles" ? 0.95 : 0, 6, dt);
+      material.opacity = THREE.MathUtils.damp(material.opacity ?? 0.82, mode === "particles" ? 0.82 : 0, 6, dt);
     }
     if (solids.current) solids.current.children.forEach((child) => {
       const material = (child as THREE.Mesh).material as THREE.MeshStandardMaterial;
-      material.opacity = THREE.MathUtils.damp(material.opacity, mode === "solid" ? 1 : 0.03, 6, dt);
+      material.opacity = THREE.MathUtils.damp(material.opacity, mode === "solid" ? 1 : 0, 6, dt);
     });
   });
 
@@ -311,7 +311,7 @@ function GliderRig({ url, target, mode }: Props) {
       <group ref={orientation}>
         {geometry && (
           <points ref={points} geometry={geometry} frustumCulled={false}>
-            <shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} vertexColors transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+            <shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} vertexColors transparent depthWrite={false} blending={THREE.NormalBlending} />
           </points>
         )}
         <group position={normalization.position} rotation={normalization.rotation} scale={normalization.scale}>
