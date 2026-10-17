@@ -173,15 +173,12 @@ function sample(geometry: THREE.BufferGeometry, amount: number, output: Float32A
 
 function colors(positions: Float32Array) {
   const output = new Float32Array(positions.length);
-  const top = new THREE.Color("#ffffff");
-  const blue = new THREE.Color("#7DA7D9");
-  const mid = new THREE.Color("#6484B5");
+  // Keep every glider particle neutral white. The former height-based tint
+  // made sections of the model turn blue as the glider moved through the path.
   for (let i = 0; i < positions.length; i += 3) {
-    const color = top.clone().lerp(blue, THREE.MathUtils.clamp((positions[i + 1] + 0.25) / 0.75, 0, 1));
-    if (Math.random() < 0.15) color.lerp(mid, 0.7);
-    output[i] = color.r;
-    output[i + 1] = color.g;
-    output[i + 2] = color.b;
+    output[i] = 1;
+    output[i + 1] = 1;
+    output[i + 2] = 1;
   }
   return output;
 }
@@ -321,7 +318,7 @@ function GliderRig({ url, target, mode }: Props) {
           <group ref={solids}>
             {meshes.map((mesh, index) => (
               <mesh key={index} geometry={mesh.geometry}>
-                <meshStandardMaterial color="#d7e0f0" metalness={0.85} roughness={0.25} emissive="#1e3a8a" emissiveIntensity={0.2} transparent opacity={0.03} />
+                <meshStandardMaterial color="#ffffff" metalness={0.85} roughness={0.25} emissive="#000000" emissiveIntensity={0} transparent opacity={0.03} />
               </mesh>
             ))}
           </group>
